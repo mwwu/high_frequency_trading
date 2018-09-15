@@ -44,12 +44,9 @@ class InputSection extends PolymerElement {
         justify-content: center;
         flex-direction: column;
     }
-    queue-text{
-        fill: rgb(0, 0, 0);
-        font-size: 10px;
-        -webkit-user-select: none;
-        cursor: default;   
-    }
+
+
+
     .button-container-speed {
         background-color: rgb(230, 230, 230);
         flex: 1 1 auto;
@@ -153,8 +150,7 @@ class InputSection extends PolymerElement {
     this.speed = false;
     inputSection.shadow_dom =  document.querySelector("input-section").shadowRoot;
     inputSection.shadow_dom_D3 = d3.select(inputSection.shadow_dom);
-    inputSection.inputWidth = document.querySelector("input-section").clientWidth*1.5;
-    inputSection.inputHeight = document.querySelector("input-section").clientHeight;
+    
 
     if(otreeConstants.FBA){
             //INPUT SECTION
@@ -167,18 +163,15 @@ class InputSection extends PolymerElement {
     }
 
     if(otreeConstants.CDA){
-        // //INPUT SECTION
-        // inputSection.shadow_dom_D3.append("svg").attr("id","IEX_queue");
-        // inputSection.queueSVGDOM = inputSection.shadow_dom.querySelector("#IEX_queue");
-        // inputSection.queueSVG = d3.select(inputSection.queueSVGDOM);
-        // inputSection.queueSVGDOM.style.width = inputSection.inputWidth;
-        // inputSection.queueSVGDOM.style.height = 50;
-        // inputSection.queueSVG.append("text")
-        //                     .attr("x", 0)  
-        //                     .attr("y", 0)
-        //                     .attr("class", "queue-text")
-        //                     .text("FUCKKCKCKCKKC");
-        // console.log(inputSection.shadow_dom);
+        //INPUT SECTION
+        inputSection.shadow_dom_D3.append("svg").attr("id","IEX_queue");
+        inputSection.queueSVGDOM = inputSection.shadow_dom.querySelector("#IEX_queue");
+        inputSection.queueSVG = d3.select(inputSection.queueSVGDOM);
+        inputSection.queueSVG.append("text")
+        .attr("x", 0)  
+        .attr("y", 0)
+        .text("FUCKKCKCKCKKC");
+        console.log(inputSection.shadow_dom);
     }
 
     inputSection.Button_Pressed = this.Button_Pressed;
@@ -362,6 +355,8 @@ class InputSection extends PolymerElement {
   }
 
   drawTimer(){
+    inputSection.inputWidth = document.querySelector("input-section").clientWidth*1.5;
+    inputSection.inputHeight = document.querySelector("input-section").clientHeight;
     inputSection.timerSVGDOM.style.width = inputSection.inputWidth;
     inputSection.timerSVGDOM.style.height = 7;
     inputSection.timerSVGDOM.style.marginBottom = "20px";

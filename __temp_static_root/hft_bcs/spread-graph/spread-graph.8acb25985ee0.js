@@ -23,7 +23,7 @@ class SpreadGraph extends PolymerElement {
         fill: none;
     }
     .price-grid-line-text {
-        fill: black;
+        fill: rgb(150, 150, 150);
         font-size: 10px;
         -webkit-user-select: none;
         cursor: default;
@@ -39,7 +39,7 @@ class SpreadGraph extends PolymerElement {
     stroke-width:2px;
     }
     .possible-spread-ticks{
-        stroke: lightgrey;
+        stroke: grey;
         stroke-width: 1;
     }
 
@@ -167,7 +167,7 @@ class SpreadGraph extends PolymerElement {
                             .style("stroke", "grey")
                             .style("stroke-width", 3);
     }   
-    if(otreeConstants.CDA == true){
+    if(otreeConstants.IEX == true){
        spreadGraph.drawPossibleSpreadTicks();
     }                    
   }
@@ -194,11 +194,11 @@ class SpreadGraph extends PolymerElement {
                 my_spread = otreeConstants.min_spread;
             }   
 
-            if(otreeConstants.CDA == true){
+            if(otreeConstants.IEX == true){
                 //Choose one of the spread lines that
                 for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
                     if(my_spread < spreadGraph.possibleSpreadLines[i]){
-                        my_spread = spreadGraph.possibleSpreadLines[i];
+                        my_spread = spreadGraph.possibleSpreadLines[i-1];
                         break;
                     }
                 }
@@ -261,10 +261,10 @@ class SpreadGraph extends PolymerElement {
                     if(my_spread < otreeConstants.min_spread){
                         my_spread = otreeConstants.min_spread;
                     }
-                    if(otreeConstants.CDA == true){  
+                    if(otreeConstants.IEX == true){  
                         for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
                             if(my_spread < spreadGraph.possibleSpreadLines[i]){
-                                my_spread = spreadGraph.possibleSpreadLines[i];
+                                my_spread = spreadGraph.possibleSpreadLines[i-1];
                                 break;
                             }
                         }
@@ -284,38 +284,36 @@ class SpreadGraph extends PolymerElement {
             //Every spread price is drawn and so is the price
             var money_ratio =  maxSpread/temp;
             var y_coordinate = svg_middle_y/money_ratio;
-
-
-
+            
             spreadGraph.spread_svg.append("svg:line")
-                .attr("x1", 0)
+                .attr("x1", (spreadGraph.spread_width / 2) - 15)
                 .attr("y1", svg_middle_y - y_coordinate)
-                .attr("x2", spreadGraph.spread_width)
+                .attr("x2", (spreadGraph.spread_width / 2) + 15)
                 .attr("y2", svg_middle_y - y_coordinate)
                 .attr("stroke-width",1)
                 .attr("class","possible-spread-ticks");
             
             spreadGraph.spread_svg.append("svg:line")
-                .attr("x1", 0)
+                .attr("x1", (spreadGraph.spread_width / 2) - 15)
                 .attr("y1", svg_middle_y + y_coordinate)
-                .attr("x2", spreadGraph.spread_width)
+                .attr("x2", (spreadGraph.spread_width / 2) + 15)
                 .attr("y2", svg_middle_y + y_coordinate)
                 .attr("stroke-width",1)
-                .attr("class","possible-spread-ticks");   
+                .attr("class","possible-spread-ticks");        
             
-            // spreadGraph.spread_svg.append("text")
-            //     .attr("text-anchor", "start")
-            //     .attr("x", (spreadGraph.spread_width / 2) - 24)  
-            //     .attr("y",  svg_middle_y + y_coordinate - 4)
-            //     .attr("class", "price-grid-line-text")
-            //     .text((temp/10000).toFixed(2));
-    
             spreadGraph.spread_svg.append("text")
                 .attr("text-anchor", "start")
-                .attr("x", (spreadGraph.spread_width/2) - 24) 
-                .attr("y",  svg_middle_y - y_coordinate + 10)
+                .attr("x", (spreadGraph.spread_width / 2) + 17)  
+                .attr("y",  svg_middle_y + y_coordinate  + 3)
                 .attr("class", "price-grid-line-text")
-                .text((temp/10000).toFixed(2));     
+                .text((temp/10000).toFixed(2));
+
+            spreadGraph.spread_svg.append("text")
+                .attr("text-anchor", "start")
+                .attr("x", (spreadGraph.spread_width / 2) + 17)  
+                .attr("y",  svg_middle_y - y_coordinate + 3)
+                .attr("class", "price-grid-line-text")
+                .text((temp/10000).toFixed(2));
             
             spreadGraph.possibleSpreadLines.push(temp);
             temp = otreeConstants.min_spread + temp;

@@ -198,7 +198,7 @@ class SpreadGraph extends PolymerElement {
                 //Choose one of the spread lines that
                 for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
                     if(my_spread < spreadGraph.possibleSpreadLines[i]){
-                        my_spread = spreadGraph.possibleSpreadLines[i];
+                        my_spread = spreadGraph.possibleSpreadLines[i-1];
                         break;
                     }
                 }
@@ -264,7 +264,7 @@ class SpreadGraph extends PolymerElement {
                     if(otreeConstants.CDA == true){  
                         for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
                             if(my_spread < spreadGraph.possibleSpreadLines[i]){
-                                my_spread = spreadGraph.possibleSpreadLines[i];
+                                my_spread = spreadGraph.possibleSpreadLines[i-1];
                                 break;
                             }
                         }

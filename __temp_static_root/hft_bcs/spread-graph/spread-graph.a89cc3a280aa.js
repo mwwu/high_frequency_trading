@@ -198,7 +198,7 @@ class SpreadGraph extends PolymerElement {
                 //Choose one of the spread lines that
                 for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
                     if(my_spread < spreadGraph.possibleSpreadLines[i]){
-                        my_spread = spreadGraph.possibleSpreadLines[i];
+                        my_spread = spreadGraph.possibleSpreadLines[i-1];
                         break;
                     }
                 }
@@ -264,7 +264,7 @@ class SpreadGraph extends PolymerElement {
                     if(otreeConstants.CDA == true){  
                         for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
                             if(my_spread < spreadGraph.possibleSpreadLines[i]){
-                                my_spread = spreadGraph.possibleSpreadLines[i];
+                                my_spread = spreadGraph.possibleSpreadLines[i-1];
                                 break;
                             }
                         }
@@ -303,17 +303,17 @@ class SpreadGraph extends PolymerElement {
                 .attr("stroke-width",1)
                 .attr("class","possible-spread-ticks");   
             
-            // spreadGraph.spread_svg.append("text")
-            //     .attr("text-anchor", "start")
-            //     .attr("x", (spreadGraph.spread_width / 2) - 24)  
-            //     .attr("y",  svg_middle_y + y_coordinate - 4)
-            //     .attr("class", "price-grid-line-text")
-            //     .text((temp/10000).toFixed(2));
+            spreadGraph.spread_svg.append("text")
+                .attr("text-anchor", "start")
+                .attr("x", (spreadGraph.spread_width / 2) - 10)  
+                .attr("y",  svg_middle_y + y_coordinate  + 5)
+                .attr("class", "price-grid-line-text")
+                .text((temp/10000).toFixed(2));
     
             spreadGraph.spread_svg.append("text")
                 .attr("text-anchor", "start")
-                .attr("x", (spreadGraph.spread_width/2) - 24) 
-                .attr("y",  svg_middle_y - y_coordinate + 10)
+                .attr("x", (spreadGraph.spread_width/2) - 10) 
+                .attr("y",  svg_middle_y - y_coordinate - 5)
                 .attr("class", "price-grid-line-text")
                 .text((temp/10000).toFixed(2));     
             

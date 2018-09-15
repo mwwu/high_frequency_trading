@@ -45,7 +45,7 @@ class InputSection extends PolymerElement {
         flex-direction: column;
     }
     queue-text{
-        fill: rgb(0, 0, 0);
+        fill: rgb(150, 150, 150);
         font-size: 10px;
         -webkit-user-select: none;
         cursor: default;   
@@ -167,18 +167,18 @@ class InputSection extends PolymerElement {
     }
 
     if(otreeConstants.CDA){
-        // //INPUT SECTION
-        // inputSection.shadow_dom_D3.append("svg").attr("id","IEX_queue");
-        // inputSection.queueSVGDOM = inputSection.shadow_dom.querySelector("#IEX_queue");
-        // inputSection.queueSVG = d3.select(inputSection.queueSVGDOM);
-        // inputSection.queueSVGDOM.style.width = inputSection.inputWidth;
-        // inputSection.queueSVGDOM.style.height = 50;
-        // inputSection.queueSVG.append("text")
-        //                     .attr("x", 0)  
-        //                     .attr("y", 0)
-        //                     .attr("class", "queue-text")
-        //                     .text("FUCKKCKCKCKKC");
-        // console.log(inputSection.shadow_dom);
+        //INPUT SECTION
+        inputSection.shadow_dom_D3.append("svg").attr("id","IEX_queue");
+        inputSection.queueSVGDOM = inputSection.shadow_dom.querySelector("#IEX_queue");
+        inputSection.queueSVG = d3.select(inputSection.queueSVGDOM);
+        inputSection.queueSVGDOM.style.width = inputSection.inputWidth;
+        inputSection.queueSVGDOM.style.height = 50;
+        inputSection.queueSVG.append("text")
+        .attr("x", 0)  
+        .attr("y", 0)
+        .attr("class", "queue-text")
+        .text("FUCKKCKCKCKKC");
+        console.log(inputSection.shadow_dom);
     }
 
     inputSection.Button_Pressed = this.Button_Pressed;
