@@ -284,7 +284,7 @@ class SpreadGraph extends PolymerElement {
     var temp = parseInt(otreeConstants.min_spread);
     var svg_middle_y = spreadGraph.spread_height/2;
     var maxSpread = parseInt(otreeConstants.maxSpread);
-   
+    spreadGraph.possibleSpreadLines = [];
         for(;temp < maxSpread;){
             //Every spread price is drawn and so is the price
             var money_ratio =  maxSpread/temp;
@@ -323,7 +323,6 @@ class SpreadGraph extends PolymerElement {
                 .text((temp/10000).toFixed(2));     
             
             spreadGraph.possibleSpreadLines.push(temp);
-            spreadGraph.queue[temp] = [];
             temp = otreeConstants.min_spread + temp;
         }
   }

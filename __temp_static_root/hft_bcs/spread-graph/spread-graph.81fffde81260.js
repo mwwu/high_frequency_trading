@@ -167,7 +167,7 @@ class SpreadGraph extends PolymerElement {
                             .style("stroke", "grey")
                             .style("stroke-width", 3);
     }   
-    if(otreeConstants.CDA == true){
+    if(otreeConstants.IEX == true){
        spreadGraph.drawPossibleSpreadTicks();
     }                    
   }
@@ -189,13 +189,12 @@ class SpreadGraph extends PolymerElement {
             var ratio = distance_from_middle / (spreadGraph.spread_height/2);
             var my_spread = (ratio*otreeConstants.maxSpread).toFixed(0);
 
-            // if(otreeConstants.IEX == true){
-            //     if(my_spread < otreeConstants.min_spread){
-            //         my_spread = otreeConstants.min_spread;
-            //     }
-            // }  
+            if(my_spread < otreeConstants.min_spread){
+                //enforce a minimum spread
+                my_spread = otreeConstants.min_spread;
+            }   
 
-            if(otreeConstants.CDA == true){
+            if(otreeConstants.IEX == true){
                 //Choose one of the spread lines that
                 for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
                     if(my_spread < spreadGraph.possibleSpreadLines[i]){
@@ -259,14 +258,10 @@ class SpreadGraph extends PolymerElement {
                     var ratio = distance_from_middle / (spreadGraph.spread_height / 2);
 
                     var my_spread = (ratio * otreeConstants.maxSpread).toFixed(0);
-
-                    // if(otreeConstants.CDA == true){
-                    //     if(my_spread < otreeConstants.min_spread){
-                    //         my_spread = otreeConstants.min_spread;
-                    //     }
-                    // }
-
-                    if(otreeConstants.CDA == true){  
+                    if(my_spread < otreeConstants.min_spread){
+                        my_spread = otreeConstants.min_spread;
+                    }
+                    if(otreeConstants.IEX == true){  
                         for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
                             if(my_spread < spreadGraph.possibleSpreadLines[i]){
                                 my_spread = spreadGraph.possibleSpreadLines[i];
@@ -284,7 +279,7 @@ class SpreadGraph extends PolymerElement {
     var temp = parseInt(otreeConstants.min_spread);
     var svg_middle_y = spreadGraph.spread_height/2;
     var maxSpread = parseInt(otreeConstants.maxSpread);
-   
+    spreadGraph.possibleSpreadLines = [];
         for(;temp < maxSpread;){
             //Every spread price is drawn and so is the price
             var money_ratio =  maxSpread/temp;
@@ -323,7 +318,6 @@ class SpreadGraph extends PolymerElement {
                 .text((temp/10000).toFixed(2));     
             
             spreadGraph.possibleSpreadLines.push(temp);
-            spreadGraph.queue[temp] = [];
             temp = otreeConstants.min_spread + temp;
         }
   }

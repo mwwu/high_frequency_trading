@@ -29,7 +29,6 @@ class PreWaitPage(WaitPage):
 class index(Page):
     pass
 
-
 test = {}
 class ResultsWaitPage(WaitPage):
     def after_all_players_arrive(self):

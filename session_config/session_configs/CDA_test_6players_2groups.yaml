@@ -16,7 +16,7 @@ group:
   number-of-groups: 2
   players-per-group: 6
 market:
-  design: "CDA"
+  design: "IEX"
   matching-engine-host: "127.0.0.1"
 parameters:
   fundamental-price: 100

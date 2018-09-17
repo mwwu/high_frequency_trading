@@ -114,6 +114,7 @@ Constant, Player, and Group Information from oTree stored in the otreeConstants 
     otreeConstants.CDA = false; //Continuous Double Auction
     otreeConstants.FBA = false; //Frequent Batch Auction
     otreeConstants.IEX = false;
+    spreadGraph.makerQueue = {};
 
     if(otreeConstants.design == "CDA"){
         otreeConstants.CDA  = true; 
@@ -364,11 +365,9 @@ Socket Actions
             if (socketActions.socket.readyState === socketActions.socket.OPEN) {
                 socketActions.socket.send(JSON.stringify(msg));
             }
-    }
-
+    
 }());
 
 </script>
-
-
+ 
 {% endblock %}

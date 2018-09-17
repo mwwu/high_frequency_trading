@@ -137,7 +137,9 @@ Graph_Features is an object that stores the features of the profit and spread gr
     spreadGraph.spreadLinesFBAConcurrent = {}; //Holds a running map of the spread lines
     spreadGraph.spreadLinesFBABatch = {};      //Holds all the lines from the last batch to figure out smallest spread
     spreadGraph.last_spread =  otreeConstants.defaultSpread/10000;
-    spreadGraph.batch = [];      
+    spreadGraph.queue = {}; 
+    spreadGraph.batch = [];  
+    spreadGraph.possibleSpreadLines = [];    
 
     //PROFIT GRAPH
     profitGraph.profit_width = document.querySelector("profit-graph").clientWidth;
@@ -213,7 +215,6 @@ Socket Actions
                     break;
                     }
                 }
-                console.log(spreadGraph.batch);
                 profitGraph.profitJumps.push(
                     {
                         timestamp:diff,
@@ -241,6 +242,11 @@ Socket Actions
             for(var key in obj.SPRCHG){
                 var incomingSpread;
                 var incomingSpread = (obj.SPRCHG[key]["A"] - obj.SPRCHG[key]["B"])/10000;
+                var queueSpread = (obj.SPRCHG[key]["A"] - obj.SPRCHG[key]["B"]);
+                if(!spreadGraph.queue[queueSpread].includes(key)){
+                    spreadGraph.queue[queueSpread].push(key);
+                }
+                console.log(spreadGraph.queue);
                 if(key == player_id && obj.SPRCHG[key] != 0 ){
                     spreadGraph.last_spread = incomingSpread;
                 }
@@ -249,6 +255,12 @@ Socket Actions
 
                 if(obj.SPRCHG[key] == 0){
                     // Maker has left the market so remove that maker tick
+                    for(price in spreadGraph.queue){
+                        console.log(spreadGraph.queue[price]);
+                        if(spreadGraph.queue[price].includes(key)){
+                            console.log(spreadGraph.queue[price].indexOf(key)); 
+                        }
+                    }
                     spreadGraph.spread_svg.selectAll(".others_line_top_" + key).remove();
                     spreadGraph.spread_svg.selectAll(".others_line_bottom_" + key).remove();
                     delete spreadGraph.spreadLinesFBAConcurrent[key];
@@ -285,7 +297,7 @@ Socket Actions
 
         if(otreeConstants.CDA == true || obj.SPRCHG[player_id] != undefined){
             spreadGraph.drawMySpreadLines(obj.SPRCHG);
-            spreadGraph.drawQueue();
+            //spreadGraph.drawQueue();
         }
         }else if(obj.SYNC != undefined){
             console.log("Recieved SYNC");
