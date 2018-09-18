@@ -281,7 +281,7 @@ class SpreadGraph extends PolymerElement {
 
   drawPossibleSpreadTicks(){
     //Draws the possible spread ticks for IEX
-    var temp = parseInt(otreeConstants.min_spread);
+    var temp = parseInt(otreeConstants.incrementIEX);
     var svg_middle_y = spreadGraph.spread_height/2;
     var maxSpread = parseInt(otreeConstants.maxSpread);
    
@@ -324,7 +324,7 @@ class SpreadGraph extends PolymerElement {
             
             spreadGraph.possibleSpreadLines.push(temp);
             spreadGraph.queue[temp] = [];
-            temp = otreeConstants.min_spread + temp;
+            temp = otreeConstants.incrementIEX + temp;
         }
   }
 
@@ -531,17 +531,17 @@ class SpreadGraph extends PolymerElement {
                         y_coordinate = svg_middle_y/money_ratio;
                         var your_spread_line_top = spreadGraph.spread_svg.append("svg:line")
                             .attr("x1",spreadGraph.spread_width)
-                            .attr("y1", svg_middle_y - y_coordinate)
+                            .attr("y1", svg_middle_y - y_coordinate + offset)
                             .attr("x2", spreadGraph.spread_width - 15)
-                            .attr("y2", svg_middle_y - y_coordinate)
+                            .attr("y2", svg_middle_y - y_coordinate + offset)
                             .attr("stroke-width",1)
                             .attr("class","others_line others_line_top_"+key);
                     
                         var your_spread_line_bottom = spreadGraph.spread_svg.append("svg:line")
                             .attr("x1", spreadGraph.spread_width)
-                            .attr("y1", y_coordinate + svg_middle_y)
+                            .attr("y1", y_coordinate + svg_middle_y + offset)
                             .attr("x2", spreadGraph.spread_width - 15)
-                            .attr("y2", y_coordinate + svg_middle_y)
+                            .attr("y2", y_coordinate + svg_middle_y + offset)
                             .attr("stroke-width",1)
                             .attr("class","others_line others_line_bottom_"+key);
 
