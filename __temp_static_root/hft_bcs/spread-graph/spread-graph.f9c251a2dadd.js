@@ -132,7 +132,6 @@ class SpreadGraph extends PolymerElement {
     spreadGraph.startBatchTimer = this.startBatchTimer;
     spreadGraph.drawPossibleSpreadTicks = this.drawPossibleSpreadTicks;
     spreadGraph.updateFBASpreadGraphLines = this.updateFBASpreadGraphLines;
-    spreadGraph.updateQueue = this.updateQueue;
     //Creating the start state
     spreadGraph.start();
     //Activating the event listener
@@ -190,11 +189,11 @@ class SpreadGraph extends PolymerElement {
             var ratio = distance_from_middle / (spreadGraph.spread_height/2);
             var my_spread = (ratio*otreeConstants.maxSpread).toFixed(0);
 
-            if(otreeConstants.CDA == true){
-                if(my_spread < otreeConstants.min_spread){
-                    my_spread = otreeConstants.min_spread;
-                }
-            }  
+            // if(otreeConstants.IEX == true){
+            //     if(my_spread < otreeConstants.min_spread){
+            //         my_spread = otreeConstants.min_spread;
+            //     }
+            // }  
 
             if(otreeConstants.CDA == true){
                 //Choose one of the spread lines that
@@ -261,11 +260,11 @@ class SpreadGraph extends PolymerElement {
 
                     var my_spread = (ratio * otreeConstants.maxSpread).toFixed(0);
 
-                    if(otreeConstants.CDA == true){
-                        if(my_spread < otreeConstants.min_spread){
-                            my_spread = otreeConstants.min_spread;
-                        }
-                    }
+                    // if(otreeConstants.CDA == true){
+                    //     if(my_spread < otreeConstants.min_spread){
+                    //         my_spread = otreeConstants.min_spread;
+                    //     }
+                    // }
 
                     if(otreeConstants.CDA == true){  
                         for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
@@ -596,13 +595,11 @@ class SpreadGraph extends PolymerElement {
   }
 
   updateQueue(){
-    var playerID = otreeConstants.playerIDInGroup;
-    console.log(spreadGraph.queue);
+      var playerID = otreeConstants.playerIDInGroup;
     for(var price in spreadGraph.queue){
-        console.log(spreadGraph.queue[price]);
-        // if(spreadGraph.queue[price].includes(playerID)){
-        //     console.log(spreadGraph.queue[price]);
-        // }
+        if(spreadGraph.queue[price].includes(playerID)){
+            console.log(spreadGraph.queue[price]);
+        }
     }   
   }
 

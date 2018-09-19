@@ -598,12 +598,12 @@ class SpreadGraph extends PolymerElement {
   updateQueue(){
     var playerID = otreeConstants.playerIDInGroup;
     console.log(spreadGraph.queue);
-    for(var price in spreadGraph.queue){
-        console.log(spreadGraph.queue[price]);
-        // if(spreadGraph.queue[price].includes(playerID)){
-        //     console.log(spreadGraph.queue[price]);
-        // }
-    }   
+    // for(var price in spreadGraph.queue){
+    //     console.log(spreadGraph.queue[price].includes(playerID));
+    //     // if(spreadGraph.queue[price].includes(playerID)){
+    //     //     console.log(spreadGraph.queue[price]);
+    //     // }
+    // }   
   }
 
   drawSpreadBar(my_spread,svg_middle_y,y_coordinate, offset, id){

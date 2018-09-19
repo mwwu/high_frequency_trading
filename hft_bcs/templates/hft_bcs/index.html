@@ -47,7 +47,7 @@
                 type: 'GET',
                 url:static_file,
                 success: function(data){
-                    console.log(static_file + " has been loaded");
+
                     // $(data).find("a:contains('.js')").each(function(){
                     //     // will loop through
                     //     console.log("second data");
@@ -239,15 +239,12 @@ Socket Actions
             // Number.MAX_SAFE_INTEGER
             var player_id = parseInt(otreeConstants.playerIDInGroup);
             var smallest_spread = [-1,Infinity];
+            updateSpreadQueue(obj.SPRCHG);
 
             for(var key in obj.SPRCHG){
                 var incomingSpread;
                 var incomingSpread = (obj.SPRCHG[key]["A"] - obj.SPRCHG[key]["B"])/10000;
-                var queueSpread = (obj.SPRCHG[key]["A"] - obj.SPRCHG[key]["B"]);
-                if(!spreadGraph.queue[queueSpread].includes(key)){
-                    spreadGraph.queue[queueSpread].push(key);
-                }
-                console.log(spreadGraph.queue);
+
                 if(key == player_id && obj.SPRCHG[key] != 0 ){
                     spreadGraph.last_spread = incomingSpread;
                 }
@@ -256,12 +253,6 @@ Socket Actions
 
                 if(obj.SPRCHG[key] == 0){
                     // Maker has left the market so remove that maker tick
-                    for(price in spreadGraph.queue){
-                        console.log(spreadGraph.queue[price]);
-                        if(spreadGraph.queue[price].includes(key)){
-                            console.log(spreadGraph.queue[price].indexOf(key)); 
-                        }
-                    }
                     spreadGraph.spread_svg.selectAll(".others_line_top_" + key).remove();
                     spreadGraph.spread_svg.selectAll(".others_line_bottom_" + key).remove();
                     delete spreadGraph.spreadLinesFBAConcurrent[key];
@@ -290,6 +281,7 @@ Socket Actions
                     smallest_spread[1] = spread;
                 }
             }
+            
             if(smallest_spread[0] == player_id){
                 spreadGraph.smallest_spread = true;
             }else{
@@ -298,8 +290,9 @@ Socket Actions
 
         if(otreeConstants.CDA == true || obj.SPRCHG[player_id] != undefined){
             spreadGraph.drawMySpreadLines(obj.SPRCHG);
-            //spreadGraph.drawQueue();
+            spreadGraph.updateQueue();
         }
+
         }else if(obj.SYNC != undefined){
             console.log("Recieved SYNC");
             otreeConstants.sync = true; 
@@ -427,6 +420,24 @@ Socket Actions
             if (socketActions.socket.readyState === socketActions.socket.OPEN) {
                 socketActions.socket.send(JSON.stringify(msg));
             }
+    }
+
+    function updateSpreadQueue(SPRCHG){
+        for(var key in SPRCHG){
+            var queueSpread = (SPRCHG[key]["A"] - SPRCHG[key]["B"]);
+            for(var price in spreadGraph.queue){
+                if(spreadGraph.queue[price].includes(key)){
+                    var index = spreadGraph.queue[price].indexOf(key);
+                    spreadGraph.queue[price].splice(index,1); 
+                }
+            }
+            if(!spreadGraph.queue[queueSpread].includes(key)){
+                spreadGraph.queue[queueSpread].push(key);
+            }
+        
+        }
+
+
     }
 }());
 </script>
