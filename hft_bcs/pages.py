@@ -29,6 +29,12 @@ class PreWaitPage(WaitPage):
 class index(Page):
     pass
 
+class indexIEX(Page):
+    def is_displayed(self):
+        is_instructed = self.subsession.is_trial or (self.subsession.first_round == self.round_number)
+        is_iex = True if self.subsession.design == 'IEX' else False
+        return is_instructed and is_iex
+
 test = {}
 class ResultsWaitPage(WaitPage):
     def after_all_players_arrive(self):
@@ -71,6 +77,7 @@ page_sequence = [
     InstructionsFBA,
     PreWaitPage,
     index,
+    indexIEX,
     ResultsWaitPage,
     Results,
     SessionResults

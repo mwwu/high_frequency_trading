@@ -596,13 +596,11 @@ class SpreadGraph extends PolymerElement {
   }
 
   updateQueue(){
-    var playerID = otreeConstants.playerIDInGroup;
-    console.log(spreadGraph.queue);
+      var playerID = otreeConstants.playerIDInGroup;
     for(var price in spreadGraph.queue){
-        console.log(spreadGraph.queue[price]);
-        // if(spreadGraph.queue[price].includes(playerID)){
-        //     console.log(spreadGraph.queue[price]);
-        // }
+        if(spreadGraph.queue[price].includes(playerID)){
+            console.log(spreadGraph.queue[price]);
+        }
     }   
   }
 
