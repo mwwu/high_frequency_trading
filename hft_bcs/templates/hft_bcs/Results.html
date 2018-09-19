@@ -3,12 +3,12 @@
 {% load staticfiles %}
 
 {% block title %}
-    Results in (Period {{ subsession.round_number }} of {{ subsession.last_round }})
+    Results in Period {{ subsession.round_number }} of {{ subsession.last_round }}
 {% endblock %}
 
 {% block content %}
-<div id="dual_x_div" style="width: 45%; height: 450px; float: left;"></div>
-<div id="piechart" style="width: 50%; height: 500px; float: right;"></div>
+<div id="dual_x_div" style="width: 55%; height: 500px; float: left;"></div>
+<div id="piechart" style="width: 45%; height: 400px; float: right;"></div>
 
 
 
@@ -73,9 +73,9 @@
                 data.addColumn({type: 'string', role: 'style'});
                 data.addColumn({type: 'string', role: 'annotation'});
                 data.addRows([
-                    ['Inside Maker', {{profit.fast_inside}}, 'color: #0033FF', 'Fast', {{profit.slow_inside}}, 'color: #0099FF', 'Slow'],
-                    ['Outside Maker', {{profit.fast_outside}},'color: #6633FF',  'Fast', {{profit.slow_outside}}, 'color: #6699FF', 'Slow'],
-                    ['Sniper', {{profit.fast_sniper}},'color: #FF9900',  'Fast', {{profit.slow_sniper}}, 'color: #FFCC66', 'Slow']
+                    ['Inside Maker', .75, 'color: #0033FF', 'Fast', .8, 'color: #0099FF', 'Slow'],
+                    ['Outside Maker', .5,'color: #6633FF',  'Fast', -.4, 'color: #6699FF', 'Slow'],
+                    ['Sniper', .2,'color: #FF9900',  'Fast', -.6, 'color: #FFCC66', 'Slow']
             
                 ]);
         var options = {
@@ -140,11 +140,12 @@
         ]);
 
         var options = {
-            title: 'Time Spent (Percentage)',
+            title: 'Time Spent per Strategy (Percentage)',
             pieHole: 0.4,
             pieSliceText: 'none',
+            chartArea: {width: '100%'},
             colors: ['#C2C2D6', '#FF9900', '#FFCC66', '#0033FF', '#0099FF'],
-            chartArea: {width: '90%'},
+           
             legend: {
                         position: 'labeled',
                         textStyle: { fontSize: 10 }
