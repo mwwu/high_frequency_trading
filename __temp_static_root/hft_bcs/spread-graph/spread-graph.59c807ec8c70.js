@@ -11,13 +11,6 @@ class SpreadGraph extends PolymerElement {
     //Second we add the HTML neccessary to be manipulated in the constructor and the subsequent functions
     spreadGraph.spread_graph_shadow_dom.innerHTML = `
 <style>
-    .user-bubble{
-        fill:#00cc00;
-        border:steelblue;
-    }
-    .other-bubble{
-        fill:lightgrey;
-    }
     .my-batch-flash {
         stroke: BlueViolet;
         stroke-width: 5;
@@ -603,29 +596,23 @@ class SpreadGraph extends PolymerElement {
   drawQueue(){
     var userPlayerID = otreeConstants.playerIDInGroup;
     var index = -1;
-    var xOffset = 0;
-    
-    var classFlag = "other-bubble";
+    var offset = 0;
     for(var price in spreadGraph.queue){
         index = parseInt(spreadGraph.queue[price].indexOf(userPlayerID.toString()));
         if(index != -1){
             for(var user = 0; user <= spreadGraph.queue[price].length - 1; user++){
+                spreadGraph.spread_svg.selectAll(".queue").remove();
                 var svgMiddleY = spreadGraph.spread_height/2;
                 var mySpread = price;
                 var moneyRatio =  otreeConstants.maxSpread/mySpread;
                 var yCoordinate = svgMiddleY/moneyRatio;
-                console.log(spreadGraph.queue[price][user]);
-                if(spreadGraph.queue[price][user] == userPlayerID){
-                    classFlag = "user-bubble"
-                }   
-                spreadGraph.spread_svg.selectAll("." + classFlag).remove();
                 spreadGraph.spread_svg.append("circle")
-                    .attr("cx", (spreadGraph.spread_width / 2) + 35 + xOffset)
+                    .attr("cx", (spreadGraph.spread_width / 2) + 35 + offset)
                     .attr("cy", svgMiddleY - yCoordinate)
                     .attr("r", 5)
-                    .attr("class","queue " + classFlag)
-
-                xOffset = xOffset + 14;
+                    .attr("class","queue")
+                    .style("fill", "yellow");
+                offset = offset + 7;
             }
         }
     }   
@@ -674,7 +661,6 @@ class SpreadGraph extends PolymerElement {
     }
 
     clear(){
-      spreadGraph.spread_svg.selectAll(".queue").remove();
       spreadGraph.spread_svg.selectAll(".my_line").remove();
       spreadGraph.spread_svg.selectAll(".others_line").remove();
       spreadGraph.spread_svg.selectAll("rect").remove();

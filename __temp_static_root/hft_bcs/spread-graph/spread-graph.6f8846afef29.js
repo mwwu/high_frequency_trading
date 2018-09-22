@@ -604,7 +604,7 @@ class SpreadGraph extends PolymerElement {
     var userPlayerID = otreeConstants.playerIDInGroup;
     var index = -1;
     var xOffset = 0;
-    
+    spreadGraph.spread_svg.selectAll(".queue").remove();
     var classFlag = "other-bubble";
     for(var price in spreadGraph.queue){
         index = parseInt(spreadGraph.queue[price].indexOf(userPlayerID.toString()));
@@ -618,7 +618,6 @@ class SpreadGraph extends PolymerElement {
                 if(spreadGraph.queue[price][user] == userPlayerID){
                     classFlag = "user-bubble"
                 }   
-                spreadGraph.spread_svg.selectAll("." + classFlag).remove();
                 spreadGraph.spread_svg.append("circle")
                     .attr("cx", (spreadGraph.spread_width / 2) + 35 + xOffset)
                     .attr("cy", svgMiddleY - yCoordinate)
@@ -674,7 +673,6 @@ class SpreadGraph extends PolymerElement {
     }
 
     clear(){
-      spreadGraph.spread_svg.selectAll(".queue").remove();
       spreadGraph.spread_svg.selectAll(".my_line").remove();
       spreadGraph.spread_svg.selectAll(".others_line").remove();
       spreadGraph.spread_svg.selectAll("rect").remove();

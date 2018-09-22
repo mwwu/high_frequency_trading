@@ -290,7 +290,7 @@ Socket Actions
 
         if(otreeConstants.CDA == true || obj.SPRCHG[player_id] != undefined){
             spreadGraph.drawMySpreadLines(obj.SPRCHG);
-            spreadGraph.updateQueue();
+            spreadGraph.drawQueue();
         }
 
         }else if(obj.SYNC != undefined){
@@ -425,16 +425,16 @@ Socket Actions
     function updateSpreadQueue(SPRCHG){
         for(var key in SPRCHG){
             var queueSpread = (SPRCHG[key]["A"] - SPRCHG[key]["B"]);
+            var index = -1;
             for(var price in spreadGraph.queue){
-                if(spreadGraph.queue[price].includes(key)){
-                    var index = spreadGraph.queue[price].indexOf(key);
+                index = spreadGraph.queue[price].indexOf(key);
+                if(index != -1){
                     spreadGraph.queue[price].splice(index,1); 
                 }
             }
             if(!spreadGraph.queue[queueSpread].includes(key)){
                 spreadGraph.queue[queueSpread].push(key);
-            }
-        
+            }  
         }
 
 

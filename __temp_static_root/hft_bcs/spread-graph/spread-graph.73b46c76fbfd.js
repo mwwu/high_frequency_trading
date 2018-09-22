@@ -674,7 +674,6 @@ class SpreadGraph extends PolymerElement {
     }
 
     clear(){
-      spreadGraph.spread_svg.selectAll(".queue").remove();
       spreadGraph.spread_svg.selectAll(".my_line").remove();
       spreadGraph.spread_svg.selectAll(".others_line").remove();
       spreadGraph.spread_svg.selectAll("rect").remove();
