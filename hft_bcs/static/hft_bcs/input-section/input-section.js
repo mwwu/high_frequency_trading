@@ -291,6 +291,8 @@ class InputSection extends PolymerElement {
     }
     spreadGraph.spread_svg.selectAll("rect").remove();
     spreadGraph.spread_svg.selectAll(".my_line").remove();
+    spreadGraph.spread_svg.selectAll(".user-bubble").remove();
+    spreadGraph.spread_svg.selectAll(".other-bubble").remove();
     delete spreadGraph.spread_lines[otreeConstants.playerID]
     delete spreadGraph.spreadLinesFBAConcurrent[otreeConstants.playerID]
      document.querySelector('info-table').spread_value = 0;
@@ -350,12 +352,15 @@ class InputSection extends PolymerElement {
      //Turn off Speed if it is on the front end
      document.querySelector('info-table').setAttribute("speed_cost",0);
      console.log("Out now");
+     
      document.querySelector('info-table').setAttribute("spread_value",0);
      document.querySelector('info-table').setAttribute("curr_bid","N/A");
      document.querySelector('info-table').setAttribute("curr_ask","N/A");
 
      spreadGraph.spread_svg.selectAll("rect").remove();
      spreadGraph.spread_svg.selectAll(".my_line").remove();
+     spreadGraph.spread_svg.selectAll(".user-bubble").remove();
+    spreadGraph.spread_svg.selectAll(".other-bubble").remove();
     delete spreadGraph.spread_lines[otreeConstants.playerID];
     delete spreadGraph.spreadLinesFBAConcurrent[otreeConstants.playerID];
     

@@ -426,18 +426,17 @@ Socket Actions
         for(var key in SPRCHG){
             var queueSpread = (SPRCHG[key]["A"] - SPRCHG[key]["B"]);
             var index = -1;
+
             for(var price in spreadGraph.queue){
                 index = spreadGraph.queue[price].indexOf(key);
                 if(index != -1){
                     spreadGraph.queue[price].splice(index,1); 
-                }
+                } 
             }
-            if(!spreadGraph.queue[queueSpread].includes(key)){
+        
                 spreadGraph.queue[queueSpread].push(key);
-            }  
+            
         }
-
-
     }
 }());
 </script>
