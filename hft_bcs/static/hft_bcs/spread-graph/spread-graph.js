@@ -214,74 +214,7 @@ class SpreadGraph extends PolymerElement {
             }
 
             spreadGraph.sendSpreadChange(my_spread);
-          } else if(role == "OUT"){
-            //  //Send in default order for maker
-            // document.querySelector('input-section').shadowRoot.querySelector("#maker").click();
-            //IF BUTTON IS NOT PRESSED OR ON THEN TURN IT ON AFTER DELAD (Button_Pressed())
-                    document.querySelector("input-section").shadowRoot.querySelector("#maker").className = "button-pressed";
-                    document.querySelector("info-table").setAttribute("player_role","MAKER");
-                    var timeNow = profitGraph.getTime() - profitGraph.timeOffset;
-                    profitGraph.profitSegments.push(
-                        {
-                            startTime:timeNow,
-                            endTime:timeNow, 
-                            startProfit:profitGraph.profit, 
-                            endProfit:profitGraph.profit,
-                            state:document.querySelector("info-table").player_role
-                        }
-                    );
-
-                    var msg = {
-                        type: 'role_change',
-                        id: otreeConstants.playerID,
-                        id_in_group: otreeConstants.playerIDInGroup,
-                        state: "MAKER"
-                    };
-
-                    if (socketActions.socket.readyState === socketActions.socket.OPEN) {
-                        socketActions.socket.send(JSON.stringify(msg));
-                    }
-                    var button_timer = setTimeout(
-                                            function(){
-                                                document.querySelector("input-section").shadowRoot.querySelector("#maker").className = "button-on";
-                                            },500);
-
-                    document.querySelector("input-section").shadowRoot.querySelector("#sniper").className = "button-off";
-                    document.querySelector("input-section").shadowRoot.querySelector("#out").className = "button-off";
-
-                    //Where the grey middle line is
-                    var svg_middle_x = spreadGraph.spread_width / 2;
-                    var fp_line_y = spreadGraph.spread_height / 2;
-
-                    //The tuple in which the mouse is clicked within the svg 
-                    var click_point = {
-                        x:(d3.event.clientX),
-                        y:(d3.event.clientY - spreadGraph.svg_y_offset)
-                    };
-
-                    //finding the distance from the mid
-                    var distance_from_middle = Math.abs(click_point.y - fp_line_y);
-
-                    var ratio = distance_from_middle / (spreadGraph.spread_height / 2);
-
-                    var my_spread = (ratio * otreeConstants.maxSpread).toFixed(0);
-
-                    if(otreeConstants.CDA == true){
-                        if(my_spread < otreeConstants.min_spread){
-                            my_spread = otreeConstants.min_spread;
-                        }
-                    }
-
-                    if(otreeConstants.CDA == true){  
-                        for(var i = 0; i < spreadGraph.possibleSpreadLines.length; i++){                
-                            if(my_spread < spreadGraph.possibleSpreadLines[i]){
-                                my_spread = spreadGraph.possibleSpreadLines[i];
-                                break;
-                            }
-                        }
-                    }
-                    spreadGraph.sendSpreadChange(my_spread);
-                }
+        }
     });
   }
 
@@ -604,9 +537,7 @@ class SpreadGraph extends PolymerElement {
     var userPlayerID = otreeConstants.playerIDInGroup;
     var index = -1;
     var xOffset = 0;
-    
-    var classFlag = "other-bubble";
-    var idFlag = 0;
+
     for(var price in spreadGraph.queue){
         index = parseInt(spreadGraph.queue[price].indexOf(userPlayerID.toString()));
         if(index != -1){
@@ -615,20 +546,21 @@ class SpreadGraph extends PolymerElement {
                 var mySpread = price;
                 var moneyRatio =  otreeConstants.maxSpread/mySpread;
                 var yCoordinate = svgMiddleY/moneyRatio;
-                idFlag = "-"+spreadGraph.queue[price][user]; 
-                console.log(idFlag);
-
                 if(spreadGraph.queue[price][user] == userPlayerID){
-                    classFlag = "user-bubble";
-                    idFlag = "";
-                }   
-
-                spreadGraph.spread_svg.select("." + classFlag).remove();
-                spreadGraph.spread_svg.append("circle")
+                    spreadGraph.spread_svg.select(".user-bubble").remove();
+                    spreadGraph.spread_svg.append("circle")
+                        .attr("cx", (spreadGraph.spread_width / 2) + 35 + xOffset)
+                        .attr("cy", svgMiddleY - yCoordinate)
+                        .attr("r", 5)
+                        .attr("class","queue user-bubble");
+                } else {
+                    spreadGraph.spread_svg.select(".other-bubble-"+spreadGraph.queue[price][user]).remove();
+                    spreadGraph.spread_svg.append("circle")
                     .attr("cx", (spreadGraph.spread_width / 2) + 35 + xOffset)
                     .attr("cy", svgMiddleY - yCoordinate)
                     .attr("r", 5)
-                    .attr("class","queue " + classFlag);
+                    .attr("class","queue other-bubble " + "other-bubble-" + spreadGraph.queue[price][user]);
+                }
                 xOffset = xOffset + 14;
             }
         }

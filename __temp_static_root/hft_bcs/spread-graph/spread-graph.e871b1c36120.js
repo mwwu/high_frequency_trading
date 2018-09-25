@@ -546,6 +546,7 @@ class SpreadGraph extends PolymerElement {
                 var mySpread = price;
                 var moneyRatio =  otreeConstants.maxSpread/mySpread;
                 var yCoordinate = svgMiddleY/moneyRatio;
+                
                 if(spreadGraph.queue[price][user] == userPlayerID){
                     spreadGraph.spread_svg.select(".user-bubble").remove();
                     spreadGraph.spread_svg.append("circle")
