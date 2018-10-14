@@ -120,12 +120,13 @@ def lablog(filename, log):
         f.write(log)
         f.write('\n')
 
-subprocesses = {}
+# self.session.vars['LEEPS'] = {}
 # TODO: refine this. add logging.
 
-def stop_exogenous(group_id):
-    if subprocesses[group_id]:
-        for v in subprocesses[group_id].values():
+def stop_exogenous(self, group_id):
+    print(self.session.vars)
+    if self.session.vars['LEEPS'][group_id]:
+        for v in self.session.vars['LEEPS'][group_id].values():
             try:
                 v.kill()
             except Exception as e:
@@ -339,7 +340,15 @@ class Group(BaseGroup):
         fp = self.session.config['fundamental_price'] * Constants.conversion_factor
         self.fp_push(fp)
         self.init_cache()
-        subprocesses[self.id] = dict()
+        
+        print('****************************************************************************************************************************************************************')
+        print(self.session.vars)
+        self.session.vars['LEEPS'] = {}
+        # self.session.vars['Leeps']['test'] = 'test'
+        self.session.vars['LEEPS'][self.id] = dict()
+        # self.session.vars['LEEPS'][self.id] = 'test'
+        # print(self.session.vars)
+        print('****************************************************************************************************************************************************************')
         self.save()
         self.subsession.save()
 
@@ -370,7 +379,7 @@ class Group(BaseGroup):
     def end_trade(self, player_id):
         if self.is_trading == True:
             log.info('Group%d: Player%d flags session end.' % (self.id, player_id))
-            stop_exogenous(self.id)
+            stop_exogenous(self,self.id)
             self.disconnect_from_exchange()
             self.loggy()
             self.is_trading = False
@@ -458,16 +467,22 @@ class Group(BaseGroup):
     def spawn(self, name, url, data):
         """
         fires exogenous investors and jumps
-        as subprocesses
+        as self.session.vars['LEEPS']
         """
+        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        print(self.id)
+        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
         cmd = ['python', name, str(self.id), url, data]
         p = subprocess.Popen(cmd)
         try:
-            subprocesses[self.id][name] = p
+            self.session.vars['LEEPS'][self.id][name] = p
         except KeyError as e:
             log.exception(e)
-            subprocesses[self.id] = {}
-            subprocesses[self.id][name] = p
+            print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+            self.session.vars['LEEPS'][self.id] = {}
+            self.session.vars['LEEPS'][self.id][name] = p
+            print(self.session.vars['LEEPS'][self.id][name])
+            print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
         log.debug('Group%d: Fire %s.' % (self.id, name))
 
     def fp_push(self, price):
