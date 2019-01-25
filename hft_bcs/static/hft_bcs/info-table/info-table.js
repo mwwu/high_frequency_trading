@@ -18,7 +18,9 @@ class InfoTable extends PolymerElement {
     interactiveComponent.infoTableDOM = interactiveComponent.interactiveComponentShadowDOM.querySelector("info-table");
     interactiveComponent.infoTableDOM.attachShadow({mode: 'open'});
 
+
     infoTable.infoTableShadowDOM = interactiveComponent.infoTableDOM.shadowRoot;
+    
     infoTable.infoTableShadowDOM.innerHTML = `<style>
     table{
       border-right:solid 1px rgb(200,200,200);

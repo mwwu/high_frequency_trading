@@ -116,38 +116,18 @@ otree.handleExecution = function (obj){
         spreadGraph.executeOrder(obj);
      
     }
-
 }
 
 otree.handleBBOChange = function (obj){
-    spreadGraph.updateBidAndAsk(obj["best_bid"],obj["best_offer"]);
+    spreadGraph.updateBidAndAsk(obj["best_bid"],obj["best_offer"]); 
     spreadGraph.bestBid = obj["best_bid"];
     spreadGraph.bestOffer = obj["best_offer"];
     var shiftNecessary = false;
-    // console.log("Changing bid to --> " + obj["best_bid"]);
-    // console.log("Changing offer to --> " + obj["best_offer"]);
 
-
-    // if(obj["best_bid"] > spreadGraph.lowerBound && obj["best_bid"] <  spreadGraph.upperBound){
-        
-    // } else {
-    //     // spreadGraph.spread_svg.select(".best-bid").remove();
-    //     shiftNecessary = true;
-    // }
-    // if(obj["best_offer"] > spreadGraph.lowerBound && obj["best_offer"] <  spreadGraph.upperBound){
-        
-    // } else {
-    //     // spreadGraph.spread_svg.select(".best-offer").remove();
-    //     shiftNecessary = true;
-    // }
 
     spreadGraph.drawBestBid(obj);
     spreadGraph.drawBestOffer(obj);
-    // if(shiftNecessary){
-    //     console.log("SHIFT IS NECESSARY--> bid = " + obj["best_bid"] + obj["best_offer"]);
-    // } else {
-    //     spreadGraph.BBOShift(obj);
-    // }
+
     spreadGraph.BBOShift(obj);
 }
 
