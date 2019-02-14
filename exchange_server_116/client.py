@@ -53,7 +53,26 @@ def main():
             message_type = OuchClientMessages.EnterOrder
             for index in itertools.count():
                 message_type = OuchClientMessages.EnterOrder
-                build_message(index)
+                input_array = build_message()
+                request = message_type(
+                    order_token='{:014d}'.format(index).encode('ascii'),
+                    buy_sell_indicator=bytes(input_array[0], 'ascii'),
+                    shares=input_array[1],
+                    stock=b'AMAZGOOG',
+                    price=input_array[2],
+                    time_in_force=input_array[3],
+                    firm=bytes(input_array[4], 'ascii'),
+                    display=b'N',
+                    capacity=b'O',
+                    intermarket_sweep_eligibility=b'N',
+                    minimum_quantity=1,
+                    cross_type=b'N',
+                    customer_type=b' ')
+                log.info("Sending Ouch message: %s", request)
+                await send(request)
+                response = await recv()
+                log.info("Received response Ouch message: %s:%d", response, len(response))
+                await asyncio.sleep(4.0)
 
         writer.close()
         await asyncio.sleep(0.5)
@@ -67,49 +86,88 @@ def main():
     finally:
         loop.close()
 
-def build_message(index)
-    print("B for buy or S for sell")
+def build_message():
+    print("Type q to start again")
+    buy_sell_builder = verify_buy_sell()
+    shares_builder = verify_shares(buy_sell_builder)
+    price_builder = verify_price(buy_sell_builder, shares_builder)
+    time_in_force_builder = verify_time()
+    firm_builder = verify_firm(buy_sell_builder)
+    return[buy_sell_builder, shares_builder, price_builder, time_in_force_builder, firm_builder]
+
+def verify_buy_sell():
+    print("Type B to buy or S to sell")
     buy_sell_input = input()
+    if (buy_sell_input == 'q'):
+        build_message()
+    elif (buy_sell_input == 'B' or buy_sell_input == 'S'):
+        return buy_sell_input
+    else:
+        print("Type B for buy, S for sell or q to start again:")
+        verify_buy_sell()
 
-    print("Number_of_shares: more than 0, less than a million")
+def verify_shares(buy_sell_builder):
+    print("Number of shares: more than 0, less than a million")
     shares_input = input()
-    #shares=randrange(1,10**6-1),
+    if(shares_input == 'q'):
+        build_message()
+    try:
+        shares_int = int(shares_input)
+    except ValueError:
+        print("You need to provide an integer.")
+        verify_shares()
+    if (shares_int < 0 or shares_int > 1000000):
+        print("You provided a value outside of range.")
+        verify_shares()
+    else:
+        # if(buy_sell_builder == 'S'):
+            # if (shares_int > seller.getShares()):
+            #     print("You don't have enough shares in your wallet")
+            #     verify_shares()
+        return shares_int
 
+def verify_price(buy_sell_builder, shares_builder):
     print("Provide the price at which you are happy to trade:")
     price_input = input()
-    #price=randrange(1,10**9-100),
+    # Check if the price is an integer:
+    try:
+        price_int = int(price_input)
+    except ValueError:
+        print("You need to provide an integer.")
+        verify_price()
+    # Check if price is in the range:
+    if (price_int<0 or price_int>(10**9-100)):
+        print("You provided a value outside of range.")
+        verify_price()
+    else:
+        # if(buy_sell_builder == 'B'):
+        #     if (price_int * shares_builder > seller.getPrice()):
+        #         print("You don't have enough cash in your wallet")
+        #         verify_price()
+        return price_int
 
-    print("Provide the time in force:")
+def verify_time():
+    print("Provide the time in force; minimum 0, max 99999")
     time_in_force_input = input()
-    #time_in_force=randrange(0,99999),
+    #time_in_force=randrange(0,99999)
+    try:
+        time_int = int(time_in_force_input)
+    except ValueError:
+        print("You need to provide an integer.")
+        verify_time()
+    if(time_int < 0 or time_int > 99999):
+        print("You provided the time outside of range.")
+        verify_time()
+    else:
+        return time_int
 
+def verify_firm(buy_sell_builder):
     print("What firm are you trading for:")
     firm_input = input()
-    #firm=b'OUCH',
-    request = message_type(
-        order_token='{:014d}'.format(index).encode('ascii'),
-        buy_sell_indicator =bytes(buy_sell_input, 'ascii'),
-        shares=int(shares_input),
-        stock=b'AMAZGOOG',
-        price=int(price_input),
-        time_in_force=int(time_in_force_input),
-        firm=bytes(firm_input, 'ascii'),
-        display=b'N',
-        capacity=b'O',
-        intermarket_sweep_eligibility=b'N',
-        minimum_quantity=1,
-        cross_type=b'N',
-        customer_type=b' ')
-    log.info("Sending Ouch message: %s", request)
-    await send(request)
-    response = await recv()
-    log.info("Received response Ouch message: %s:%d", response, len(response))
-    await asyncio.sleep(4.0)
-
-def verify_buy_sell:
-    #input here
-
-
+    # if (buy_sell_builder == 'S'):
+    #     if not firm_input.belongsTo(portfolio):
+    #         print("You don't have this firm")
+    return firm_input
 
 if __name__ == '__main__':
     main()
