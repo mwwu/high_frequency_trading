@@ -115,10 +115,10 @@ def verify_shares(buy_sell_builder):
         shares_int = int(shares_input)
     except ValueError:
         print("You need to provide an integer.")
-        verify_shares()
+        verify_shares(buy_sell_builder)
     if (shares_int < 0 or shares_int > 1000000):
         print("You provided a value outside of range.")
-        verify_shares()
+        verify_shares(buy_sell_builder)
     else:
         # if(buy_sell_builder == 'S'):
             # if (shares_int > seller.getShares()):
@@ -134,11 +134,11 @@ def verify_price(buy_sell_builder, shares_builder):
         price_int = int(price_input)
     except ValueError:
         print("You need to provide an integer.")
-        verify_price()
+        verify_price(buy_sell_builder, shares_builder)
     # Check if price is in the range:
     if (price_int<0 or price_int>(10**9-100)):
         print("You provided a value outside of range.")
-        verify_price()
+        verify_price(buy_sell_builder, shares_builder)
     else:
         # if(buy_sell_builder == 'B'):
         #     if (price_int * shares_builder > seller.getPrice()):
