@@ -52,6 +52,7 @@ def main():
         while True:
             message_type = OuchClientMessages.EnterOrder
             for index in itertools.count():
+                message_type = OuchClientMessages.EnterOrder
                 build_message(index)
 
         writer.close()
@@ -67,7 +68,6 @@ def main():
         loop.close()
 
 def build_message(index)
-    message_type = OuchClientMessages.EnterOrder
     print("B for buy or S for sell")
     buy_sell_input = input()
 
