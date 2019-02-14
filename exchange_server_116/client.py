@@ -52,44 +52,7 @@ def main():
         while True:
             message_type = OuchClientMessages.EnterOrder
             for index in itertools.count():
-                message_type = OuchClientMessages.EnterOrder
-                print("B for buy or S for sell")
-                buy_sell_input = input()
-
-                print("Number_of_shares: more than 0, less than a million")
-                shares_input = input()
-                #shares=randrange(1,10**6-1),
-
-                print("Provide the price at which you are happy to trade:")
-                price_input = input()
-                #price=randrange(1,10**9-100),
-
-                print("Provide the time in force:")
-                time_in_force_input = input()
-                #time_in_force=randrange(0,99999),
-
-                print("What firm are you trading for:")
-                firm_input = input()
-                #firm=b'OUCH',
-                request = message_type(
-                    order_token='{:014d}'.format(index).encode('ascii'),
-                    buy_sell_indicator = bytes(buy_sell_input, 'ascii'),
-                    shares=int(shares_input),
-                    stock=b'AMAZGOOG',
-                    price=int(price_input),
-                    time_in_force=int(time_in_force_input),
-                    firm = bytes(firm_input, 'ascii'),
-                    display=b'N',
-                    capacity=b'O',
-                    intermarket_sweep_eligibility=b'N',
-                    minimum_quantity=1,
-                    cross_type=b'N',
-                    customer_type=b' ')
-                log.info("Sending Ouch message: %s", request)
-                await send(request)
-                response = await recv()
-                log.info("Received response Ouch message: %s:%d", response, len(response))
-                await asyncio.sleep(4.0)
+                build_message(index)
 
         writer.close()
         await asyncio.sleep(0.5)
@@ -102,6 +65,51 @@ def main():
         loop.run_until_complete(client())
     finally:
         loop.close()
+
+def build_message(index)
+    message_type = OuchClientMessages.EnterOrder
+    print("B for buy or S for sell")
+    buy_sell_input = input()
+
+    print("Number_of_shares: more than 0, less than a million")
+    shares_input = input()
+    #shares=randrange(1,10**6-1),
+
+    print("Provide the price at which you are happy to trade:")
+    price_input = input()
+    #price=randrange(1,10**9-100),
+
+    print("Provide the time in force:")
+    time_in_force_input = input()
+    #time_in_force=randrange(0,99999),
+
+    print("What firm are you trading for:")
+    firm_input = input()
+    #firm=b'OUCH',
+    request = message_type(
+        order_token='{:014d}'.format(index).encode('ascii'),
+        buy_sell_indicator =bytes(buy_sell_input, 'ascii'),
+        shares=int(shares_input),
+        stock=b'AMAZGOOG',
+        price=int(price_input),
+        time_in_force=int(time_in_force_input),
+        firm=bytes(firm_input, 'ascii'),
+        display=b'N',
+        capacity=b'O',
+        intermarket_sweep_eligibility=b'N',
+        minimum_quantity=1,
+        cross_type=b'N',
+        customer_type=b' ')
+    log.info("Sending Ouch message: %s", request)
+    await send(request)
+    response = await recv()
+    log.info("Received response Ouch message: %s:%d", response, len(response))
+    await asyncio.sleep(4.0)
+
+def verify_buy_sell:
+    #input here
+
+
 
 if __name__ == '__main__':
     main()
