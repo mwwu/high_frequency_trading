@@ -254,5 +254,3 @@ def add_withdraw_cash(self):
             break;
         else:
             print("Please try again.")
-
-main()
