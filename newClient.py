@@ -222,6 +222,89 @@ def sell_share(self, share, price, amt):
     else:
         self.inventory[share] -= amt
         self.cash += amt*price
+# Tasks 1 and 5
+def build_message():
+    print("Type q to start again")
+    buy_sell_builder = verify_buy_sell()
+    shares_builder = verify_shares(buy_sell_builder)
+    price_builder = verify_price(buy_sell_builder, shares_builder)
+    time_in_force_builder = verify_time()
+    firm_builder = verify_firm(buy_sell_builder)
+    return[buy_sell_builder, shares_builder, price_builder, time_in_force_builder, firm_builder]
+
+def verify_buy_sell():
+    print("Type B to buy or S to sell")
+    buy_sell_input = input()
+    if (buy_sell_input == 'q'):
+        build_message()
+    elif (buy_sell_input == 'B' or buy_sell_input == 'S'):
+        return buy_sell_input
+    else:
+        print("Type B for buy, S for sell or q to start again:")
+        verify_buy_sell()
+
+def verify_shares(buy_sell_builder):
+    print("Number of shares: more than 0, less than a million")
+    shares_input = input()
+    if(shares_input == 'q'):
+        build_message()
+    try:
+        shares_int = int(shares_input)
+    except ValueError:
+        print("You need to provide an integer.")
+        verify_shares(buy_sell_builder)
+    if (shares_int < 0 or shares_int > 1000000):
+        print("You provided a value outside of range.")
+        verify_shares(buy_sell_builder)
+    else:
+        # if(buy_sell_builder == 'S'):
+            # if (shares_int > seller.getShares()):
+            #     print("You don't have enough shares in your wallet")
+            #     verify_shares()
+        return shares_int
+
+def verify_price(buy_sell_builder, shares_builder):
+    print("Provide the price at which you are happy to trade:")
+    price_input = input()
+    # Check if the price is an integer:
+    try:
+        price_int = int(price_input)
+    except ValueError:
+        print("You need to provide an integer.")
+        verify_price(buy_sell_builder, shares_builder)
+    # Check if price is in the range:
+    if (price_int<0 or price_int>(10**9-100)):
+        print("You provided a value outside of range.")
+        verify_price(buy_sell_builder, shares_builder)
+    else:
+        # if(buy_sell_builder == 'B'):
+        #     if (price_int * shares_builder > seller.getPrice()):
+        #         print("You don't have enough cash in your wallet")
+        #         verify_price()
+        return price_int
+
+def verify_time():
+    print("Provide the time in force; minimum 0, max 99999")
+    time_in_force_input = input()
+    #time_in_force=randrange(0,99999)
+    try:
+        time_int = int(time_in_force_input)
+    except ValueError:
+        print("You need to provide an integer.")
+        verify_time()
+    if(time_int < 0 or time_int > 99999):
+        print("You provided the time outside of range.")
+        verify_time()
+    else:
+        return time_int
+
+def verify_firm(buy_sell_builder):
+    print("What firm are you trading for:")
+    firm_input = input()
+    # if (buy_sell_builder == 'S'):
+    #     if not firm_input.belongsTo(portfolio):
+    #         print("You don't have this firm")
+    return firm_input
 
 # Task 6: Add and Withdraw Cash from Wallet
 def add_withdraw_cash(self):
@@ -238,6 +321,5 @@ def add_withdraw_cash(self):
             break;
         else:
             print("Please try again.")
-
 
 main()
