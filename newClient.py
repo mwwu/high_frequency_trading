@@ -73,141 +73,74 @@ class Trade_Station(object):
             else:
                 print("Please try again.")
 
-
 def main():
-    John = Trade_Station(1000, 1)
-    # Trade_Station.__init__('John', 1000, 1)
-    John.add_withdraw_cash()
-    print(John.get_id())
-    print(John.get_cash())
-    John.buy_share("APPL", 10, 20)
-    John.buy_share("GOOG", 10, 10)
-    print(John.get_id())
-    print(John.get_cash())
-    inventory = John.get_inventory()
-    for k, v in inventory.items():
-        print(k +' '+ str(v))
+    log.basicConfig(level=log.DEBUG)
+    log.debug(options)
 
-    John.sell_share("GOOG", 10, 3)
-    print(John.get_id())
-    print(John.get_cash())
-    for k, v in inventory.items():
-        print(k +' '+ str(v))
+    async def client():
+        reader, writer = await asyncio.streams.open_connection(
+            options.host,
+            options.port,
+            loop=loop)
+
+        async def send(request):
+            writer.write(bytes(request))
+            await writer.drain()
+
+        async def recv():
+            try:
+                header = (await reader.readexactly(1))
+            except asyncio.IncompleteReadError:
+                log.error('connection terminated without response')
+                return None
+            message_type = OuchServerMessages.lookup_by_header_bytes(header)
+            try:
+                payload = (await reader.readexactly(message_type.payload_size))
+            except asyncio.IncompleteReadError as err:
+                log.error('Connection terminated mid-packet!')
+                return None
+
+            response_msg = message_type.from_bytes(payload, header=False)
+            return response_msg
+
+        # send a line
+        while True:
+            message_type = OuchClientMessages.EnterOrder
+            for index in itertools.count():
+                message_type = OuchClientMessages.EnterOrder
+                input_array = build_message()
+                request = message_type(
+                    order_token='{:014d}'.format(index).encode('ascii'),
+                    buy_sell_indicator=bytes(input_array[0], 'ascii'),
+                    shares=input_array[1],
+                    stock=b'AMAZGOOG',
+                    price=input_array[2],
+                    time_in_force=input_array[3],
+                    firm=bytes(input_array[4], 'ascii'),
+                    display=b'N',
+                    capacity=b'O',
+                    intermarket_sweep_eligibility=b'N',
+                    minimum_quantity=1,
+                    cross_type=b'N',
+                    customer_type=b' ')
+                log.info("Sending Ouch message: %s", request)
+                await send(request)
+                response = await recv()
+                log.info("Received response Ouch message: %s:%d", response, len(response))
+                await asyncio.sleep(4.0)
+
+        writer.close()
+        await asyncio.sleep(0.5)
 
 
-#
-# p = configargparse.ArgParser()
-# p.add('--port', default=9001)
-# p.add('--host', default='127.0.0.1', help="Address of server")
-# options, args = p.parse_known_args()
-#
-# global id_list = []
-# def main():
-#
-#     Trade_Station user =  new Trade_Station(10000,)
-#
-#     log.basicConfig(level=log.DEBUG)
-#     log.debug(options)
-#     async def client():
-#         reader, writer = await asyncio.streams.open_connection(
-#             options.host,
-#             options.port,
-#             loop=loop)
-#
-#         async def send(request):
-#             writer.write(bytes(request))
-#             await writer.drain()
-#
-#         async def recv():
-#             try:
-#                 header = (await reader.readexactly(1))
-#             except asyncio.IncompleteReadError:
-#                 log.error('connection terminated without response')
-#                 return None
-#             message_type = OuchServerMessages.lookup_by_header_bytes(header)
-#             try:
-#                 payload = (await reader.readexactly(message_type.payload_size))
-#             except asyncio.IncompleteReadError as err:
-#                 log.error('Connection terminated mid-packet!')
-#                 return None
-#
-#             response_msg = message_type.from_bytes(payload, header=False)
-#             return response_msg
-#
-#     for index in itertools.count():
-#         print("Provide your order in the following format: <><><><>...<>")
-#         # order_token='{:014d}'.format(index).encode('ascii'),
-#
-#         print("<XXX>: stock symbol")
-#         print("<Price_of_exchange>")
-#         print("<Time_in_force> how long you want your order to be on market before it gets cancelled")
-#         print("<Owner_firm>")
-#
-#         try:
-#             message_type = OuchClientMessages.EnterOrder
-#                 order_token='{:014d}'.format(index).encode('ascii'),
-#
-#                 print("B for buy or S for sell")
-#                 buy_sell_input = input()
-#                 buy_sell_indicator = bin(buy_sell_input)
-#
-#                 print("Number_of_shares>: more than 0, less than a million")
-#                 shares = input()
-#                 #shares=randrange(1,10**6-1),
-#
-#                 stock_input = input()
-#
-#                 stock=b'AMAZGOOG',
-#                 price=randrange(1,10**9-100),
-#                 time_in_force=randrange(0,99999),
-#                 firm=b'OUCH',
-#                 request = message_type(
-#                     order_token='{:014d}'.format(index).encode('ascii'),
-#                     buy_sell_indicator=b'B',
-#                     shares=randrange(1,10**6-1),
-#                     stock=b'AMAZGOOG',
-#                     price=randrange(1,10**9-100),
-#                     time_in_force=randrange(0,99999),
-#                     firm=b'OUCH',
-#                     display=b'N',
-#                     capacity=b'O',
-#                     intermarket_sweep_eligibility=b'N',
-#                     minimum_quantity=1,
-#                     cross_type=b'N',
-#                     customer_type=b' ')
-#                 log.info("Sending Ouch message: %s", request)
-#                 await send(request)
-#                 response = await recv()
-#                 log.info("Received response Ouch message: %s:%d", response, len(response))
-#                 await asyncio.sleep(4.0)
-#         # except Exception as e:
-#         #     raise
-#                 writer.close()
-#                 await asyncio.sleep(0.5)
-#             loop = asyncio.get_event_loop()
-#
-#             # creates a client and connects to our server
-#             try:
-#                 loop.run_until_complete(client())
-#             finally:
-#                 loop.close()
-#
-#
-#
-# def buy_sell_input_function():
-#     print("Type B for buy and S for sell:")
-#     buy_sell_input = input()
-#     if(buy_sell_input=="q"):
-#
-#     elif (re.search("B"|"S", buy_sell_input)):
-#         buy_sell_indicator = bin(buy_sell_input)
-#     else:
-#         print("You have mistyped the order type.")
-#         buy_sell_input_function()
-#
-#
-# if __name__ == '__main__':
-#             main()
+    loop = asyncio.get_event_loop()
+
+    # creates a client and connects to our server
+    try:
+        loop.run_until_complete(client())
+    finally:
+        loop.close()
+
 def buy_share(self, share, price, amt):
     if(share not in self.inventory):
         self.inventory[share] = amt
