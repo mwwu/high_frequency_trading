@@ -1,19 +1,3 @@
-# Goal: to first be able to read client's input and run it to Exchange
-#       second to get output from exchange server and save it
-#       third keep track of client's shares and cash
-
-# Tasks:
-#   1. Parsing functions for input
-#   2. Set up wallet structure
-#   3. Receive and parse output
-#      Communication with another file for output (exchange.py line 116)
-#      goes into wallet, communicate wallet with client, then client goes to exchange
-#   4. Update wallet for buying and selling
-#   5. Cash limitation for purchases
-#   6. Add or withdraw cash
-
-#   2&6 FM, 3&4 WMW, 1&5 JMC
-
 import sys
 import asyncio
 import asyncio.streams
@@ -26,8 +10,61 @@ import itertools
 import time
 import random
 import numpy
+# import ElementTree
+import xml.etree.ElementTree as ET
+# writing to csv file
+import csv
 
 from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
+
+# WRITING DATA TO AN XML FILE
+# class XML_Structure:
+#     def _init_(self, trader):
+#         # add trader node as root
+#         traderTree = ET.element('trader')
+#         root = traderNode.getroot()
+#         self.root = root
+#         root.set('id', id)
+#
+#         # add wallet node: cash & inventory
+#         walletNode = ET.SubElement(root, 'wallet')
+#         cashNode = ET.SubElement(walletNode, 'cash')
+#         inventoryNode = ET.SubElement(walletNode, 'inventory')
+#         # add inventory attribute: stock
+#         stockNode = ET.SubElement(inventoryNode, 'stock')
+#         # add stock attributes: value & quantity
+#         valueNode = ET.SubElement(stockNode, 'value')
+#         quantityNode = ET.SubElement(stockNode, 'quantity')
+#
+#         # add history node: order
+#         historyNode = ET.SubElement(root, 'history')
+#         orderNode = ET.SubElement(historyNode, 'order')
+#
+#         # create an XML file with the results
+#         myTrader = ET.tostring(traderTree)
+#         self.fileName = str(trader.get_id()) + ".xml"
+#         traderNode.write(fileName)
+#
+#     def getFileName(self):
+#         return self.fileName
+#
+#     def getRoot(self):
+#         return self.root
+#
+#     # function to edit cash in the file
+#     def modify_cash(self, newCash):
+#         traderNode = ET.parse(self.getFileName())
+#         root = getRoot(self)
+#         root[0][0].text = newCash
+#
+#
+#     # function to edit stock in the file
+#     def editStock(self, stockName, value, quantity):
+#
+#
+#     # function to add new order to history - need to edit the "update()" function
+#     def add_order(self):
+#         # add order attributes: status, direction, price, quantity, time in force, timestamp
 
 
 class Trade_Station:
@@ -40,6 +77,7 @@ class Trade_Station:
         self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
         self.bid_quantity = {}
         self.ask_quantity = {}
+        # self.xml = XML_Structure(self)
 
     def summary(self):  # should remove order_tokens when transaction is complete
         print("id:{} cash:{}\n"
@@ -54,21 +92,21 @@ class Trade_Station:
                       self.bid_stocks,
                       self.ask_stocks))
 
-
-    def buy_share(self, share, price,
-                  amt):  # probably shouldnt use these functions because it is adding to inventory before
-        if share not in self.inventory:  # it has crossed
-            self.inventory[share] = amt
-        else:
-            self.inventory[share] += amt
-        self.cash -= amt * price
-
-    def sell_share(self, share, price, amt):
-        if share not in self.inventory:
-            print("You do not own these shares")
-        else:
-            self.inventory[share] -= amt
-            self.cash += amt * price
+    #--------BUY_SHARE AND SELL_SHARE FUNCTIONS NOT USED--------
+    # def buy_share(self, share, price,
+    #               amt):  # probably shouldnt use these functions because it is adding to inventory before
+    #     if share not in self.inventory:  # it has crossed
+    #         self.inventory[share] = amt
+    #     else:
+    #         self.inventory[share] += amt
+    #     self.cash -= amt * price
+    #
+    # def sell_share(self, share, price, amt):
+    #     if share not in self.inventory:
+    #         print("You do not own these shares")
+    #     else:
+    #         self.inventory[share] -= amt
+    #         self.cash += amt * price
 
     def get_id(self):
         return self.id
@@ -102,6 +140,14 @@ p.add('--host', default='127.0.0.1', help="Address of server")
 options, args = p.parse_known_args()
 
 def main():
+    # writing data to a csv file to record the history of orders
+    history = open('countries.csv', 'w')
+    with history:
+        myFields = ['trader_ID', 'status', 'direction', 'time_in_force',
+                    'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
+        writer = csv.DictWriter(myFile, fieldnames=myFields)
+        writer.writeheader()
+
     user = Trade_Station(1000000, 1)
 
     log.basicConfig(level=log.DEBUG)
@@ -240,7 +286,7 @@ def main():
             cost = executed_price * executed_shares
             print("\nHere is the parsed token:{}\n".format(parsed_token))
             print("\nHere are the executed_shares {}\n".format(executed_shares))
-            print("\nHere are the executed_price {}\n".format(executed_price))
+            print("\nHere is the executed_price {}\n".format(executed_price))
             if parsed_token in user.order_tokens and user.order_tokens[parsed_token] == 'B':
                 user.cash -= cost
                 share_name = [user.bid_stocks[i] for i in user.bid_stocks if i == parsed_token]
