@@ -139,18 +139,30 @@ p.add('--port', default=9001)
 p.add('--host', default='127.0.0.1', help="Address of server")
 options, args = p.parse_known_args()
 
-class CSVBase:
+class CSVManager:
     def _init_(self, userID):
         self.fileName = userID + '_' + str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '.csv'
+        history = open(self.fileName, 'w')
+        with history:
+            myFields = ['trader_ID', 'status', 'direction', 'time_in_force', 'timestamp',
+                        'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
+            writer = csv.DictWriter(self.fileName, fieldnames=myFields)
+            writer.writeheader()
+        history.close()
+
 
     def getFileName():
         return self.fileName
 
     def getLastOrderID():
-
+        reader = csv.reader(self.fileName, delimiter = ',')
+        fullOrderID = str(reader[1][0])
+        orderNumberStr = fullOrderID[4:]
+        reader.close()
+        return int(orderNumberStr)
 
     def getCash():
-
+        
 
     def getStock():
 
@@ -163,12 +175,7 @@ def main():
     now = datetime.datetime.now()
     fileName = userID + '_' + str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '.csv'
     # writing data to a csv file to record the history of orders
-    history = open(fileName, 'w')
-    with history:
-        myFields = ['trader_ID', 'status', 'direction', 'time_in_force', 'timestamp',
-                    'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
-        writer = csv.DictWriter(fileName, fieldnames=myFields)
-        writer.writeheader()
+
 
     log.basicConfig(level=log.DEBUG)
     log.debug(options)
