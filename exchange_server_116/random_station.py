@@ -135,8 +135,11 @@ def main():
 
         # Tasks 1 and 5
         async def build_message():
-            print("Type q to start again")
-            buy_sell_builder = 'B'
+            indicator = random.random()
+            buy_sell_builder = 'S'
+            if (indicator > 0.5):
+                buy_sell_builder = 'B'
+
             shares_rate_avg = 150
             shares_builder = numpy.random.poisson(shares_rate_avg)
             mean_price = 200
@@ -222,12 +225,12 @@ def main():
                     try:
                         response = await asyncio.wait_for(recv(), timeout=0.5)
                         log.info("Received response Ouch message: %s:%d", response, len(response))
-                        output = str(response)
-                        if output[0] == 'E':
-                            await update(output, user)
+                    #     output = str(response)
+                    #     if output[0] == 'E':
+                    #         await update(output, user)
                     except asyncio.TimeoutError:
                         break
-                await asyncio.sleep(1.0)
+                await asyncio.sleep(10.0)
 
         writer.close()
         asyncio.sleep(4.0)

@@ -125,11 +125,11 @@ class Trade_Station:
             if (add_or_withdraw == 'A'):
                 add = input("How much money do you want to add? ")
                 self.cash += int(add)
-                break;
+                break
             elif (add_or_withdraw == 'B'):
                 sub = input("How much money do you want to withdraw? ")
                 self.cash -= int(sub)
-                break;
+                break
             else:
                 print("Please try again.")
 
@@ -169,11 +169,16 @@ class CSVManager:
 
 
 def main():
+<<<<<<< HEAD
+    userID
+    user = Trade_Station(1000000, userID)
+=======
 
     userID = '0001'
     user = Trade_Station(1000000, userID)
     now = datetime.datetime.now()
     fileName = userID + '_' + str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '.csv'
+>>>>>>> 07d8fbe27d28e29cf44353ff03d08b65c6921095
     # writing data to a csv file to record the history of orders
 
 
@@ -294,11 +299,11 @@ def main():
                 if (add_or_withdraw == 'A'):
                     add = input("How much money do you want to add? ")
                     self.cash += add
-                    break;
+                    break
                 elif (add_or_withdraw == 'B'):
                     sub = input("How much money do you want to withdraw? ")
                     self.cash -= sub
-                    break;
+                    break
                 else:
                     print("Please try again.")
 
@@ -329,6 +334,7 @@ def main():
                         del user.inventory[share_name[0]]
 
             client.summary()
+
 
         while True:
             message_type = OuchClientMessages.EnterOrder

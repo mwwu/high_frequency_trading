@@ -25,6 +25,7 @@ from random import randrange
 import itertools
 import time
 import random
+import numpy
 
 from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
 
