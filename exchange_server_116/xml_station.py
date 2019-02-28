@@ -162,25 +162,15 @@ class CSVManager:
         return int(orderNumberStr)
 
     def getCash():
-        
+
 
     def getStock():
 
 
 
 def main():
-<<<<<<< HEAD
-    userID
-    user = Trade_Station(1000000, userID)
-=======
-
     userID = '0001'
     user = Trade_Station(1000000, userID)
-    now = datetime.datetime.now()
-    fileName = userID + '_' + str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '.csv'
->>>>>>> 07d8fbe27d28e29cf44353ff03d08b65c6921095
-    # writing data to a csv file to record the history of orders
-
 
     log.basicConfig(level=log.DEBUG)
     log.debug(options)
