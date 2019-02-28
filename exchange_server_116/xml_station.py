@@ -139,15 +139,40 @@ p.add('--port', default=9001)
 p.add('--host', default='127.0.0.1', help="Address of server")
 options, args = p.parse_known_args()
 
+class CSVBase:
+    def _init_(self, userID):
+        self.fileName = userID + '_' + str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '.csv'
+
+    def getFileName():
+        return self.fileName
+
+    def getLastOrderID():
+
+
+    def getCash():
+
+
+    def getStock():
+
+
+
 def main():
+<<<<<<< HEAD
     userID
     user = Trade_Station(1000000, userID)
+=======
+
+    userID = '0001'
+    user = Trade_Station(1000000, userID)
+    now = datetime.datetime.now()
+    fileName = userID + '_' + str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '.csv'
+>>>>>>> 07d8fbe27d28e29cf44353ff03d08b65c6921095
     # writing data to a csv file to record the history of orders
-    history = open('countries.csv', 'w')
+    history = open(fileName, 'w')
     with history:
-        myFields = ['trader_ID', 'status', 'direction', 'time_in_force',
+        myFields = ['trader_ID', 'status', 'direction', 'time_in_force', 'timestamp',
                     'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
-        writer = csv.DictWriter(myFile, fieldnames=myFields)
+        writer = csv.DictWriter(fileName, fieldnames=myFields)
         writer.writeheader()
 
     log.basicConfig(level=log.DEBUG)
@@ -312,6 +337,10 @@ def main():
                 # ['B', 200, 12, 2432, 'Ouch']
                 binary_buysell = user_input[0].encode("ascii")
                 buy_sell = user_input[0]
+
+                userID = user.get_id()
+                tokenID =
+
 
                 token = '{:014d}'.format(index).encode('ascii')
                 token = token.decode('ascii')
