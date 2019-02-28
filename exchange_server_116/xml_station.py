@@ -125,11 +125,11 @@ class Trade_Station:
             if (add_or_withdraw == 'A'):
                 add = input("How much money do you want to add? ")
                 self.cash += int(add)
-                break;
+                break
             elif (add_or_withdraw == 'B'):
                 sub = input("How much money do you want to withdraw? ")
                 self.cash -= int(sub)
-                break;
+                break
             else:
                 print("Please try again.")
 
@@ -140,6 +140,8 @@ p.add('--host', default='127.0.0.1', help="Address of server")
 options, args = p.parse_known_args()
 
 def main():
+    userID
+    user = Trade_Station(1000000, userID)
     # writing data to a csv file to record the history of orders
     history = open('countries.csv', 'w')
     with history:
@@ -147,8 +149,6 @@ def main():
                     'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
         writer = csv.DictWriter(myFile, fieldnames=myFields)
         writer.writeheader()
-
-    user = Trade_Station(1000000, 1)
 
     log.basicConfig(level=log.DEBUG)
     log.debug(options)
@@ -267,11 +267,11 @@ def main():
                 if (add_or_withdraw == 'A'):
                     add = input("How much money do you want to add? ")
                     self.cash += add
-                    break;
+                    break
                 elif (add_or_withdraw == 'B'):
                     sub = input("How much money do you want to withdraw? ")
                     self.cash -= sub
-                    break;
+                    break
                 else:
                     print("Please try again.")
 
@@ -302,6 +302,7 @@ def main():
                         del user.inventory[share_name[0]]
 
             client.summary()
+
 
         while True:
             message_type = OuchClientMessages.EnterOrder
