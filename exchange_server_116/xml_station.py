@@ -14,6 +14,7 @@ import numpy
 import xml.etree.ElementTree as ET
 # writing to csv file
 import csv
+import os
 
 from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
 
@@ -142,29 +143,53 @@ options, args = p.parse_known_args()
 class CSVManager:
     def _init_(self, userID):
         self.fileName = userID + '_' + str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '.csv'
-        history = open(self.fileName, 'w')
-        with history:
-            myFields = ['trader_ID', 'status', 'direction', 'time_in_force', 'timestamp',
-                        'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
-            writer = csv.DictWriter(self.fileName, fieldnames=myFields)
-            writer.writeheader()
-        history.close()
+        self.lastOrderNo = -1
+        try:
+            # Check if a given .csv file exists.
+            # If yes, pull its last order number, cash and stock.
+            file = open(self.fileName, 'r')
+            file.close()
+            lastLine = readLastLine(self.fileName)
+            self.lastOrderNo = pullLastOrderID(lastLine)
+            self.cash = pullCash(lastLine)
+            self.stock = pullStock(lastLine)
+        except IOError:
+            with open(self.fileName, 'w') as history:
+                myFields = ['trader_ID', 'status', 'direction', 'time_in_force', 'timestamp',
+                            'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
+                writer = csv.DictWriter(self.fileName, fieldnames=myFields)
+                writer.writeheader()
+            writer.close()
 
+    def readLastLine(fileName):
+        with open(fileName, 'r') as order_history:
+            for row in reversed(list(csv.reader(order_history))):
+                lastLine = row
+                break     
+        order_history.close()
+        return lastLine
 
-    def getFileName():
-        return self.fileName
-
-    def getLastOrderID():
-        reader = csv.reader(self.fileName, delimiter = ',')
-        fullOrderID = str(reader[1][0])
+    def pullLastOrderID(lastLine):
+        fullOrderID = lastLine[0]
         orderNumberStr = fullOrderID[4:]
-        reader.close()
         return int(orderNumberStr)
 
-    def getCash():
+    def pullCash(lastLine):
+        return lastLine[7]
 
+    def pullStock(lastLine):
+        return lastLine[8]
+
+    def getLastOrderID():
+        return self.lastOrderNo
 
     def getStock():
+        return self.stock
+
+    def getCash():
+        return self.cash
+
+
 
 
 
