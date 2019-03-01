@@ -42,7 +42,7 @@ class Maker_Client:
         self.best_offer = best_offer
         self.bid_i = bid_i
         self.ask_i = ask_i
-
+   
     def get_id(self):
         return self.id
 
