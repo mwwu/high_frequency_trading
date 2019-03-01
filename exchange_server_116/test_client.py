@@ -12,10 +12,10 @@ from random import randrange
 import itertools
 
 from exchange_server_116.inventory import Inventory
-from state import OrderType
+from exchange_server_116.state import OrderType
 
 
-from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
+from exchange_server_116.OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
 
 def main():
     inventory = Inventory(100, 1)

@@ -69,7 +69,7 @@ def main():
     s = socket.socket()
     s.connect(('localhost', 9001))
     factory.exchangeServer = s
-    reactor.listenTCP(8000,factory)
+    reactor.listenTCP(8000, factory)
     # will not exit run
     reactor.run()
 

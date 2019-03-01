@@ -5,11 +5,11 @@ import logging as log
 from functools import partial
 from exchange_server_116.OuchServer.ouch_server import ProtocolMessageServer
 from exchange_server_116.OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
-from exchange_server_116.order_books.cda_book import CDABook
-from exchange_server_116.order_books.fba_book import FBABook
-from exchange_server_116.exchange import Exchange
-from exchange_server_116.fba_exchange import FBAExchange
-from exchange_server_116.order_books.book_logging import BookLogger
+from exchange_server_116.exchange.order_books.cda_book import CDABook
+from exchange_server_116.exchange.order_books.fba_book import FBABook
+from exchange_server_116.exchange.order_books import Exchange
+from exchange_server_116.exchange.order_books import FBAExchange
+from exchange_server_116.exchange.order_books.book_logging import BookLogger
 
 p = configargparse.getArgParser()
 p.add('--port', default=12345)
