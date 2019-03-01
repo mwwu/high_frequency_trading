@@ -1,4 +1,4 @@
-from protocol_message_primitives import *
+from exchange_server_116.OuchServer.protocol_message_primitives import *
 
 class CalcProtocolFields(ProtocolFieldEnum):
     message_type = ('c', 'Message Type Specifier')

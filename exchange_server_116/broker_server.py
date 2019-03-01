@@ -1,6 +1,6 @@
 from twisted.internet import reactor, protocol
 import socket
-from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
+from exchange_server_116.OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
 
 class Echo(protocol.Protocol):
 

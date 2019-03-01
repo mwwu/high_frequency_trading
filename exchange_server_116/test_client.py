@@ -11,7 +11,7 @@ import logging as log
 from random import randrange
 import itertools
 
-from inventory import Inventory
+from exchange_server_116.inventory import Inventory
 from state import OrderType
 
 
