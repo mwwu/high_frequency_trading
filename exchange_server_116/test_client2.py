@@ -17,7 +17,7 @@ class EchoClient(LineReceiver):
 
     def lineReceived(self, line):
         # prints to client
-        print("receive:", line)
+        print("sent:", line)
 
 class EchoClientFactory(ClientFactory):
     protocol = EchoClient
