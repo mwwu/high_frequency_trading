@@ -8,19 +8,24 @@ from twisted.internet import task
 from twisted.internet.defer import Deferred
 from twisted.internet.protocol import ClientFactory
 from twisted.protocols.basic import LineReceiver
+import time
+from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
+from random import randrange
 
-class EchoClient(LineReceiver):
+
+class Trader(LineReceiver):
     def connectionMade(self):
-        # ordertoken, buy/sell, stock, price range
-        # sends message to server
-        self.sendLine(b"00000000000000:B44xAMAZGOOG@33")
+        self.transport.write(b"00000000000000:B44xAMAZGOOG@33")
+        print("sent to server: 00000000000000:B44xAMAZGOOG@33")
 
     def lineReceived(self, line):
-        # prints to client
-        print("sent:", line)
+        print("received from server:", line)
 
-class EchoClientFactory(ClientFactory):
-    protocol = EchoClient
+    def dataReceived(self, data):
+        print("data received from server:", data.decode())
+
+class TraderFactory(ClientFactory):
+    protocol = Trader
 
     def __init__(self):
         self.done = Deferred()
@@ -34,10 +39,9 @@ class EchoClientFactory(ClientFactory):
         self.done.callback(None)
 
 def main(reactor):
-    factory = EchoClientFactory()
+    factory = TraderFactory()
     reactor.connectTCP('localhost', 8000, factory)
     return factory.done
-
 
 
 if __name__ == '__main__':
