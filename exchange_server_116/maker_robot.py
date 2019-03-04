@@ -21,13 +21,12 @@
 # Send new message []
 #
 from __future__ import print_function
-from twisted.internet import reactor
-from twisted.internet.protocol import Protocol
-from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 
-#import make_connection
-from make_connection import Greeter
-from make_connection import gotProtocol
+# import make_connection
+from exchange_server_116.make_connection import Greeter
+from exchange_server_116.make_connection import gotProtocol
+from twisted.internet import reactor
+from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 
 aggressiveness = 0.5
 S_CONST = 1
@@ -122,5 +121,4 @@ class Maker_Client:
 		print("33333333333\n")
 
 
-#if __name__ == '__main__':
-  #  task.react(main)
+
