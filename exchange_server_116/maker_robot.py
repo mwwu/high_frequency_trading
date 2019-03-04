@@ -20,6 +20,8 @@
 
 # Send new message []
 #
+
+from hft import equations
 from __future__ import print_function
 from twisted.internet import reactor
 from twisted.internet.protocol import Protocol
@@ -29,7 +31,15 @@ from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 from make_connection import Greeter
 from make_connection import gotProtocol
 
-aggressiveness = 0.5
+b_x = 0.5 #slider 
+b_y = 0.5 #slider 
+
+a_x = 0.5 #slider 
+a_y = 0.5 #slider 
+
+x = 1 #get from broker 
+y = 1 #get from broker
+
 S_CONST = 1
 
 class Maker_Client:
@@ -110,6 +120,41 @@ class Maker_Client:
 		if self.inventory[share_name[0]] == 0:
 			del self.inventory[share_name[0]]
 
+
+
+
+	def bid_aggressiveness(b_x, b_y, x, y):
+		"""
+		B(x(t), y(t))
+		x: order imbalance
+		y: inventory position
+		"""
+		return - b_x * x + b_y * y
+
+	def sell_aggressiveness(a_x, a_y, x, y):
+		"""
+		A(x(t), y(t))
+		x: order imbalance
+		y: inventory position
+		"""
+		return a_x * x - a_y * y
+ 
+	def latent_bid(bb, S, bid_aggressiveness):
+		"""
+		LB(t)
+		bb: best bid
+		S: half a tick
+		"""
+		return bb - S * bid_aggressiveness
+
+	def latent_offer(bo, S, sell_aggressiveness):
+		"""
+		LB(t)
+		bb: best offer
+		S: half a tick
+		"""
+		return bo + S * sell_aggressiveness
+
 	def connect(self):
 		#self.connector.connectTCP("localhost", 8000)
 		print("Trying to connect ...\n")
@@ -120,6 +165,8 @@ class Maker_Client:
 		print("22222222222\n")
 		reactor.run()
 		print("33333333333\n")
+
+
 
 
 #if __name__ == '__main__':
