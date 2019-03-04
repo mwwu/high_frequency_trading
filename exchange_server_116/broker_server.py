@@ -6,6 +6,7 @@ class Echo(protocol.Protocol):
 
     def connectionMade(self):
         self.factory.clients.append(self)
+        print("A connection was made")
 
     def dataReceived(self, data):
         self.factory.book.append(data)
@@ -59,6 +60,8 @@ class Echo(protocol.Protocol):
             # first is best bid, second is best offer
             request = "2x3:5x6;"
             c.transport.write(bytes(request.encode()))
+        
+        print("Data recieved")
 
 def main():
     """This runs the protocol on port 8000"""

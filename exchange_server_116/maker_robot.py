@@ -21,25 +21,18 @@
 # Send new message []
 #
 from __future__ import print_function
-
 from twisted.internet import reactor
-from twisted.internet import task
-from twisted.internet.defer import Deferred
-from twisted.internet.protocol import Protocol, ClientCreator, ClientFactory
-from twisted.protocols.basic import LineReceiver
+from twisted.internet.protocol import Protocol
+from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
+
+#import make_connection
+from make_connection import Greeter
+from make_connection import gotProtocol
 
 aggressiveness = 0.5
 S_CONST = 1
 
-class Greeter(Protocol):
-	def sendMessage(self, msg):
-		self.transport.write("MESSAGE %s\n", msg)
-
 class Maker_Client:
-	best_bid = 0
-	best_offer = 0
-	bid_i = 0
-	ask_i = 0
 	def __init__(self, cash, id):
 		self.id = id
 		self.cash = cash
@@ -49,11 +42,11 @@ class Maker_Client:
 		self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
 		self.bid_quantity = {}
 		self.ask_quantity = {}
-		self.best_bid = best_bid
-		self.best_offer = best_offer
-		self.bid_i = bid_i
-		self.ask_i = ask_i
-		self.connector = ClientCreator(reactor, Greeter)      
+		self.best_bid = 0
+		self.best_offer = 0
+		self.bid_i = 0
+		self.ask_i = 0
+		self.point = TCP4ClientEndpoint(reactor, "localhost", 8000) 
 
 	def get_id(self):
 		return self.id
@@ -117,19 +110,17 @@ class Maker_Client:
 		if self.inventory[share_name[0]] == 0:
 			del self.inventory[share_name[0]]
 
-
-	def gotProtocol(p):
-		p.sendMessage("Helllo")
-		reactor.calllater(1, p.sendMessage, "This is sent in a second")
-		reactor.calllater(2, p.transport.loseConnection)
-
-
 	def connect(self):
-		self.connector.connectTCP("localhost", 9001).addCallback(gotProtocol)
+		#self.connector.connectTCP("localhost", 8000)
+		print("Trying to connect ...\n")
+		
+		d = connectProtocol(self.point, Greeter())
+		print("111111111111111\n")
+		d.addCallback(gotProtocol)
+		print("22222222222\n")
+		reactor.run()
+		print("33333333333\n")
 
-def main(reactor):
-	robot1 = Maker_Client(0, 1)
-	robot1.connect()
 
-if __name__ == '__main__':
-    task.react(main)
+#if __name__ == '__main__':
+  #  task.react(main)
