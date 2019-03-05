@@ -26,6 +26,7 @@ import itertools
 import time
 import random
 import numpy
+from multiprocessing import Process, Pool
 
 from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
 
@@ -87,11 +88,11 @@ class Trade_Station:
             if (add_or_withdraw == 'A'):
                 add = input("How much money do you want to add? ")
                 self.cash += int(add)
-                break;
+                break
             elif (add_or_withdraw == 'B'):
                 sub = input("How much money do you want to withdraw? ")
                 self.cash -= int(sub)
-                break;
+                break
             else:
                 print("Please try again.")
 
@@ -101,9 +102,8 @@ p.add('--port', default=9001)
 p.add('--host', default='127.0.0.1', help="Address of server")
 options, args = p.parse_known_args()
 
-def main():
-    user = Trade_Station(1000000, 1)
-
+def trade(id):
+    user = Trade_Station(1000000, id)
     log.basicConfig(level=log.DEBUG)
     log.debug(options)
 
@@ -180,13 +180,13 @@ def main():
             message_type = OuchClientMessages.EnterOrder
             for index in itertools.count():
                 user_input = await build_message()  #why does this not return a list?
-                print(user_input)
+                # print(user_input)
                 # ['B', 200, 12, 2432, 'Ouch']
                 binary_buysell = user_input[0].encode("ascii")
                 buy_sell = user_input[0]
-
-                token = '{:014d}'.format(index).encode('ascii')
-                token = token.decode('ascii')
+                userTokenPart = '{:04d}'.format(user.get_id())
+                orderTokenPart = '{:010d}'.format(index)
+                token = ('' + userTokenPart + orderTokenPart).encode('ascii')
                 bstock = b'AMAZGOOG'
                 stock = bstock.decode('ascii')
                 price = user_input[2]
@@ -201,7 +201,7 @@ def main():
                     user.ask_stocks[token] = stock
 
                 request = message_type(
-                     order_token='{:014d}'.format(index).encode('ascii'),
+                     order_token=token,
                      buy_sell_indicator=binary_buysell,
                      shares=num_shares,
                      stock=b'AMAZGOOG',
@@ -241,7 +241,9 @@ def main():
         loop.run_until_complete(client())
     finally:
         loop.close()
-
-
+    
 if __name__ == '__main__':
-    main()
+    loop = asyncio.get_event_loop()
+    for id in range(1, int(sys.argv[1])):
+        p = Process(target = trade, args=(id,))
+        p.start()
