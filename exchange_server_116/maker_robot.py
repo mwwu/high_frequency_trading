@@ -30,13 +30,13 @@ from exchange_server_116.make_connection import gotProtocol
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 
-
-aggressiveness = 0.5
+from exchange_server_116.OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
 
 #import make_connection
 from exchange_server_116.make_connection import Greeter
 from exchange_server_116.make_connection import gotProtocol
 
+aggressiveness = 0.5
 b_x = 0.5 #slider 
 b_y = 0.5 #slider 
 
@@ -63,7 +63,8 @@ class Maker_Client:
 		self.best_offer = 0
 		self.bid_i = 0
 		self.ask_i = 0
-		self.point = TCP4ClientEndpoint(reactor, "localhost", 8000) 
+		self.point = TCP4ClientEndpoint(reactor, "localhost", 8000)
+		self.test = 0
 
 	def get_id(self):
 		return self.id
@@ -162,14 +163,33 @@ class Maker_Client:
 		return bo + S * sell_aggressiveness
 
 	def connect(self):
-
 		print("Trying to connect ...\n")
 		d = connectProtocol(self.point, Greeter())
+		self.test = d
 		print("111111111111111\n")
 		d.addCallback(gotProtocol)
 		print("22222222222\n")
 		reactor.run()
-		print("33333333333\n")
+
+	def build_Message(self):
+		#parameters: buy/sell and price
+		message_type = OuchClientMessages.EnterOrder
+
+		request = message_type(
+			order_token='{:014d}'.format(1000).encode('ascii'),
+			buy_sell_indicator='B',
+			shares=10,
+			stock=b'AMAZGOOG',
+			price=1000,
+			time_in_force=10000,
+			firm=b'OUCH',
+			display=b'N',
+			capacity=b'O',
+			intermarket_sweep_eligibility=b'N',
+			minimum_quantity=1,
+			cross_type=b'N',
+			customer_type=b' ')
+	    self.test = Greeter.sendMessage(request)
 
 
 

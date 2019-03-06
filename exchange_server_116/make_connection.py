@@ -5,10 +5,13 @@ from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 
 class Greeter(Protocol):
     def sendMessage(self, msg):
-        self.transport.write("MESSAGE %s\n" % msg)
+        self.transport.write("%s" % msg)
 
     # handle the BBO here and create new formula
 
+    def dataReceived(self, data):
+        print("in client's dataReceived")
+        print(data)
 
 
 
