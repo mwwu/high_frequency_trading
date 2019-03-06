@@ -7,11 +7,19 @@ class Greeter(Protocol):
     def sendMessage(self, msg):
         self.transport.write("MESSAGE %s\n" % msg)
 
+    # handle the BBO here and create new formula
+
+
+
+
 
 def gotProtocol(p):
     p.sendMessage("Hello")
     reactor.callLater(1, p.sendMessage, "This is sent in a second")
     reactor.callLater(2, p.transport.loseConnection)
+
+
+
 
 #point = TCP4ClientEndpoint(reactor, "localhost", 8000)
 #d = connectProtocol(point, Greeter())

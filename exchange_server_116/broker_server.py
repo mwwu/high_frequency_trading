@@ -50,18 +50,27 @@ class Echo(protocol.Protocol):
             minimum_quantity=1,
             cross_type=b'N',
             customer_type=b' ')
-        #self.factory.exchangeServer.sendall(bytes(request))
-        self.factory.exchangeServer.sendmsg(data.decode())
+        self.factory.exchangeServer.sendall(bytes(request))
 
         #3. calculate best bid and best offer
+        i = 0
+        for key in sorted(buyStock):
+            i += 1
+            if (i == len(buyStock)):
+                bestBid = (key, buyStock[key])
+            bestBid = (key, buyStock[key])
+            break
+
+            #print ("%s: %s" % (key, buyStock[key]))
+        for key in sorted(sellStock):
+            bestOffer = (key, sellStock[key])
+            break
 
         #4. broadcast BB BO to all the clients
         for c in self.factory.clients:
-            # first is best bid, second is best offer
-            request = "2x3:5x6;"
+            request = "BB2x3BO5x6"
             c.transport.write(bytes(request.encode()))
-        
-        print("Data recieved")
+        print('sent to all clients: ' + request)
 
 def main():
     """This runs the protocol on port 8000"""
