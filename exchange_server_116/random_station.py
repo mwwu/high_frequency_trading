@@ -244,6 +244,6 @@ def trade(id):
     
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    for id in range(1, int(sys.argv[1])):
+    for id in range(0, int(sys.argv[1])):
         p = Process(target = trade, args=(id,))
         p.start()
