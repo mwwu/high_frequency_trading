@@ -10,6 +10,8 @@ class ClientServer(protocol.Protocol):
         self.factory.clients.append(self)
         print('client connected')
 
+    #00000000000000:B44xAMAZGOOG@33
+    #00000000001000:B10xAMAZGOOG@1000
     def dataReceived(self, data):
         traderID = self.factory.clients.index(self)
 
@@ -23,15 +25,21 @@ class ClientServer(protocol.Protocol):
         #1. parse the message into our database
         text1 = data.decode()
         token = text1.split(':')
-        if (token[1][0] == 'B'):
-          temp = token[1].split('B')
+        print("Printing out token:\n")
+        for t in token: print(t)
+        print("\nFinished printing out token.")
+        if (token[2][0] == 'B'):
+          temp = token[2].split('B')
         else:
-          temp = token[1].split('S')
+          temp = token[2].split('S')
+        print("Printing out temp:\n")
+        for t in temp: print(t)
+        print("\nFinished printing out temp.")
         qShares = temp[1].split('x')
         stockName = qShares[1].split('@')
 
         # appending to dictionaries
-        if (token[1][0] == 'B'):
+        if (token[2][0] == 'B'):
             buyStock[stockName[1]] = qShares[0]
         else:
             sellStock[stockName[1]] = qShares[0]
