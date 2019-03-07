@@ -23,7 +23,15 @@
 
 from __future__ import print_function
 
+from twisted.python import log
+
+from sys import stdout
 # import make_connection
+from twisted.internet.protocol import Protocol
+from twisted.internet import protocol
+
+from twisted.words.protocols import irc
+
 from make_connection import Greeter
 from make_connection import gotProtocol
 from twisted.internet import reactor
@@ -34,6 +42,8 @@ from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
 #import make_connection
 from make_connection import Greeter
 from make_connection import gotProtocol
+
+from twisted.protocols.basic import LineReceiver
 
 aggressiveness = 0.5
 b_x = 0.5 #slider 
@@ -48,7 +58,9 @@ y = 1 #get from broker
 
 S_CONST = 1
 
-class Maker_Client:
+#class Maker_Client(irc.IRCClient):
+#class Maker_Client(Protocol):
+class Maker_Client(LineReceiver):
   def __init__(self, cash, id):
     self.id = id
     self.cash = cash
@@ -161,6 +173,22 @@ class Maker_Client:
     """
     return bo + S * sell_aggressiveness
 
+  def dataReceived(self, data):
+    print("in client's dataReceived")
+    print(data)
+
+  def connectionMade(self, msg):
+    print("Inside connectionMade \n")
+
+    #msg = self.build_Message()
+    
+    self.transport.write(msg)
+    #self.transport.write(bytes(msg.encode()))
+    #irc.IRCClient.connectionMade(self)
+    
+    #self.transport.write("%s\r\n" % msg)
+    #self.logger = MessageLogger(open(self.factory.filename
+
   def connect(self):
     print("Trying to connect ...\n")
     d = connectProtocol(self.point, Greeter())
@@ -187,8 +215,8 @@ class Maker_Client:
       cross_type=b'N', 
       customer_type=b' '
     )
-
-    self.point.sendMessage(request)
+    return request
+    #self.point.sendMessage(request)
 
 """
   def build_Message(self):
