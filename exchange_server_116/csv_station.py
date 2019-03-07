@@ -159,15 +159,16 @@ class CSVManager:
                             'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
                 writer = csv.DictWriter(self.fileName, fieldnames=myFields)
                 writer.writeheader()
-                writer.writerow({'trader_ID': self.id,
-                                 # 'status': ,
-                                 'direction': self.order_tokens,
-                                 'time_in_force': time_in_force_builder,
-                                 # 'timestamp': ,
-                                 'stock_price': price_builder,
-                                 'stock_quantity': shares_builder,
-                                 'trader_cash': self.cash,
-                                 'current_stock': self.inventory})
+                # passing in the parameters from into the designated fieldnames
+                writer.writerow({'order_ID': ,
+                                 'status': ,
+                                 'direction': ,
+                                 'time_in_force': ,
+                                 'timestamp': ,
+                                 'stock_price': ,
+                                 'stock_quantity': ,
+                                 'trader_cash': ,
+                                 'current_stock': })
             writer.close()
 
     def readLastLine(fileName):
