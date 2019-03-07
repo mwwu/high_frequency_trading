@@ -179,15 +179,24 @@ class Maker_Client(LineReceiver):
   def connectionMade(self):
     msg =str(self.build_Message())
     
+    print("Message sent to broker printing..:\n")
+    print(msg)
+    print("Finished printing message to broker.\n")
     self.transport.write(bytes((msg).encode()))
-    print("%s\n",msg)
+
+  def connectionMade_2(self):
+    msg = str(self.build_Message_2('B'))
+    self.transport.write(bytes((msg).encode()))
 
   def lineReceived(self, line):
     print("received from server:", line)
 
   def dataReceived(self, data):
     print("data received from server:", data.decode())
-
+    #BB2x3BO5x6
+    self.best_bid = 3
+    self.best_offer = 4
+    self.connectionMade_2()
 
   def build_Message(self):
     #parameters: buy/sell and price
@@ -197,6 +206,30 @@ class Maker_Client(LineReceiver):
       buy_sell_indicator='B', shares=10, 
       stock=b'AMAZGOOG', 
       price=1000, 
+      time_in_force=10000, 
+      firm=b'OUCH',
+      display=b'N', 
+      capacity=b'O', 
+      intermarket_sweep_eligibility=b'N', 
+      minimum_quantity=1, 
+      cross_type=b'N', 
+      customer_type=b' '
+    )
+    return request
+
+  def build_Message_2(self, Buy_or_Sell):
+    #parameters: buy/sell and price
+    if(Buy_or_Sell == 'S'):
+      Price = self.new_ask() 
+    else:
+      Price = self.new_bid()
+
+    message_type = OuchClientMessages.ReplaceOrder
+    request = message_type (
+      order_token='{:014d}'.format(1000).encode('ascii'), 
+      buy_sell_indicator= Buy_or_Sell, shares= 10000, 
+      stock=b'AMAZGOOG', 
+      price=Price, 
       time_in_force=10000, 
       firm=b'OUCH',
       display=b'N', 

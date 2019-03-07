@@ -77,10 +77,13 @@ class ClientServer(protocol.Protocol):
             if (i == len(buyStock)):
                 bestBid = (key, buyStock[key])
             bestBid = (key, buyStock[key])
+            #print("bestBid\n", bestBid)
             break
             #print ("%s: %s" % (key, buyStock[key]))
         for key in sorted(sellStock):
             bestOffer = (key, sellStock[key])
+            #print("bestOffer\n", bestBid.key)
+            #print("bestOffer\n", bestBid.sellStock[key])
             break
 
         #4. broadcast BB BO to all the clients
