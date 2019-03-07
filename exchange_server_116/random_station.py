@@ -26,6 +26,7 @@ import itertools
 import time
 import random
 import numpy
+from multiprocessing import Process, Pool
 
 from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
 
@@ -87,11 +88,11 @@ class Trade_Station:
             if (add_or_withdraw == 'A'):
                 add = input("How much money do you want to add? ")
                 self.cash += int(add)
-                break;
+                break
             elif (add_or_withdraw == 'B'):
                 sub = input("How much money do you want to withdraw? ")
                 self.cash -= int(sub)
-                break;
+                break
             else:
                 print("Please try again.")
 
@@ -101,9 +102,8 @@ p.add('--port', default=9001)
 p.add('--host', default='127.0.0.1', help="Address of server")
 options, args = p.parse_known_args()
 
-def main():
-    user = Trade_Station(1000000, 1)
-
+def trade(id):
+    user = Trade_Station(1000000, id)
     log.basicConfig(level=log.DEBUG)
     log.debug(options)
 
@@ -135,99 +135,18 @@ def main():
 
         # Tasks 1 and 5
         async def build_message():
-            print("Type q to start again")
-            buy_sell_builder = await verify_buy_sell()
-            shares_builder = await verify_shares(buy_sell_builder)
-            price_builder = await verify_price(buy_sell_builder, shares_builder)
-            time_in_force_builder = await verify_time()
-            firm_builder = await verify_firm(buy_sell_builder)
-            return [buy_sell_builder, shares_builder, price_builder, time_in_force_builder, firm_builder]
+            indicator = random.random()
+            buy_sell_builder = 'S'
+            if (indicator > 0.5):
+                buy_sell_builder = 'B'
 
-        async def verify_buy_sell():
-            print("Type B to buy or S to sell")
-            buy_sell_input = input()
-            if (buy_sell_input == 'q'):
-                build_message()
-            elif (buy_sell_input == 'B' or buy_sell_input == 'S'):
-                return buy_sell_input
-            else:
-                print("Type B for buy, S for sell or q to start again:")
-                verify_buy_sell()
-
-        async def verify_shares(buy_sell_builder):
-            print("Number of shares: more than 0, less than a million")
-            shares_input = input()
-            if (shares_input == 'q'):
-                build_message()
-            try:
-                shares_int = int(shares_input)
-            except ValueError:
-                print("You need to provide an integer.")
-                verify_shares(buy_sell_builder)
-            if (shares_int < 0 or shares_int > 1000000):
-                print("You provided a value outside of range.")
-                verify_shares(buy_sell_builder)
-            else:
-                # if(buy_sell_builder == 'S'):
-                # if (shares_int > seller.getShares()):
-                #     print("You don't have enough shares in your wallet")
-                #     verify_shares()
-                return shares_int
-
-        async def verify_price(buy_sell_builder, shares_builder):
-            print("Provide the price at which you are happy to trade:")
-            price_input = input()
-            # Check if the price is an integer:
-            try:
-                price_int = int(price_input)
-            except ValueError:
-                print("You need to provide an integer.")
-                verify_price(buy_sell_builder, shares_builder)
-            # Check if price is in the range:
-            if (price_int < 0 or price_int > (10 ** 9 - 100)):
-                print("You provided a value outside of range.")
-                verify_price(buy_sell_builder, shares_builder)
-            else:
-                return price_int
-
-        async def verify_time():
-            print("Provide the time in force; minimum 0, max 99999")
-            time_in_force_input = input()
-            # time_in_force=randrange(0,99999)
-            try:
-                time_int = int(time_in_force_input)
-            except ValueError:
-                print("You need to provide an integer.")
-                verify_time()
-            if (time_int < 0 or time_int > 99999):
-                print("You provided the time outside of range.")
-                verify_time()
-            else:
-                return time_int
-
-        async def verify_firm(buy_sell_builder):
-            print("What firm are you trading for:")
-            firm_input = input()
-            # if (buy_sell_builder == 'S'):
-            #     if not firm_input.belongsTo(portfolio):
-            #         print("You don't have this firm")
-            return firm_input
-
-        # Task 6: Add and Withdraw Cash from Wallet
-        async def add_withdraw_cash(self):
-            print("Do you want to add or withdraw cash? ")
-            add_or_withdraw = input("Type A for add and W for withdraw. ")
-            while (1):
-                if (add_or_withdraw == 'A'):
-                    add = input("How much money do you want to add? ")
-                    self.cash += add
-                    break;
-                elif (add_or_withdraw == 'B'):
-                    sub = input("How much money do you want to withdraw? ")
-                    self.cash -= sub
-                    break;
-                else:
-                    print("Please try again.")
+            shares_rate_avg = 150
+            shares_builder = numpy.random.poisson(shares_rate_avg)
+            mean_price = 200
+            sd = 2
+            price_builder = round(numpy.random.normal(mean_price,sd))
+            time_in_force_builder = 99999
+            return [buy_sell_builder, shares_builder, price_builder, time_in_force_builder]
 
         async def update(ex_msg, client):
             parsed_token = output[18:32]
@@ -261,13 +180,13 @@ def main():
             message_type = OuchClientMessages.EnterOrder
             for index in itertools.count():
                 user_input = await build_message()  #why does this not return a list?
-                print(user_input)
+                # print(user_input)
                 # ['B', 200, 12, 2432, 'Ouch']
                 binary_buysell = user_input[0].encode("ascii")
                 buy_sell = user_input[0]
-
-                token = '{:014d}'.format(index).encode('ascii')
-                token = token.decode('ascii')
+                userTokenPart = '{:04d}'.format(user.get_id())
+                orderTokenPart = '{:010d}'.format(index)
+                token = ('' + userTokenPart + orderTokenPart).encode('ascii')
                 bstock = b'AMAZGOOG'
                 stock = bstock.decode('ascii')
                 price = user_input[2]
@@ -282,7 +201,7 @@ def main():
                     user.ask_stocks[token] = stock
 
                 request = message_type(
-                     order_token='{:014d}'.format(index).encode('ascii'),
+                     order_token=token,
                      buy_sell_indicator=binary_buysell,
                      shares=num_shares,
                      stock=b'AMAZGOOG',
@@ -306,15 +225,15 @@ def main():
                     try:
                         response = await asyncio.wait_for(recv(), timeout=0.5)
                         log.info("Received response Ouch message: %s:%d", response, len(response))
-                        output = str(response)
-                        if output[0] == 'E':
-                            await update(output, user)
+                    #     output = str(response)
+                    #     if output[0] == 'E':
+                    #         await update(output, user)
                     except asyncio.TimeoutError:
                         break
-                await asyncio.sleep(4.0)
+                await asyncio.sleep(10.0)
 
         writer.close()
-        asyncio.sleep(0.5)
+        asyncio.sleep(4.0)
 
     loop = asyncio.get_event_loop()
 # creates a client and connects to our server
@@ -322,7 +241,9 @@ def main():
         loop.run_until_complete(client())
     finally:
         loop.close()
-
-
+    
 if __name__ == '__main__':
-    main()
+    loop = asyncio.get_event_loop()
+    for id in range(0, int(sys.argv[1])):
+        p = Process(target = trade, args=(id,))
+        p.start()
