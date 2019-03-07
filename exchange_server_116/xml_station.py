@@ -159,13 +159,22 @@ class CSVManager:
                             'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
                 writer = csv.DictWriter(self.fileName, fieldnames=myFields)
                 writer.writeheader()
+                writer.writerow({'trader_ID': self.id,
+                                 # 'status': ,
+                                 'direction': self.order_tokens,
+                                 'time_in_force': time_in_force_builder,
+                                 # 'timestamp': ,
+                                 'stock_price': price_builder,
+                                 'stock_quantity': shares_builder,
+                                 'trader_cash': self.cash,
+                                 'current_stock': self.inventory})
             writer.close()
 
     def readLastLine(fileName):
         with open(fileName, 'r') as order_history:
             for row in reversed(list(csv.reader(order_history))):
                 lastLine = row
-                break     
+                break
         order_history.close()
         return lastLine
 
