@@ -23,7 +23,10 @@
 
 from __future__ import print_function
 
+from twisted.internet import task
+from twisted.internet.protocol import ClientFactory
 from twisted.python import log
+from twisted.internet.defer import Deferred
 
 from sys import stdout
 # import make_connection
@@ -61,9 +64,9 @@ S_CONST = 1
 #class Maker_Client(irc.IRCClient):
 #class Maker_Client(Protocol):
 class Maker_Client(LineReceiver):
-  def __init__(self, cash, id):
-    self.id = id
-    self.cash = cash
+  def __init__(self):
+    self.id = 0
+    self.cash = 0
     self.inventory = {}
     self.order_tokens = {}  # key = order token and value = 'B' or 'S'
     self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
@@ -173,30 +176,18 @@ class Maker_Client(LineReceiver):
     """
     return bo + S * sell_aggressiveness
 
+  def connectionMade(self):
+    msg =str(self.build_Message())
+    
+    self.transport.write(bytes((msg).encode()))
+    print("%s\n",msg)
+
+  def lineReceived(self, line):
+    print("received from server:", line)
+
   def dataReceived(self, data):
-    print("in client's dataReceived")
-    print(data)
+    print("data received from server:", data.decode())
 
-  def connectionMade(self, msg):
-    print("Inside connectionMade \n")
-
-    #msg = self.build_Message()
-    
-    self.transport.write(msg)
-    #self.transport.write(bytes(msg.encode()))
-    #irc.IRCClient.connectionMade(self)
-    
-    #self.transport.write("%s\r\n" % msg)
-    #self.logger = MessageLogger(open(self.factory.filename
-
-  def connect(self):
-    print("Trying to connect ...\n")
-    d = connectProtocol(self.point, Greeter())
-    self.test = d
-    print("111111111111111\n")
-    d.addCallback(gotProtocol)
-    print("22222222222\n")
-    #reactor.run()
 
   def build_Message(self):
     #parameters: buy/sell and price
@@ -216,27 +207,31 @@ class Maker_Client(LineReceiver):
       customer_type=b' '
     )
     return request
-    #self.point.sendMessage(request)
 
 """
-  def build_Message(self):
-    #parameters: buy/sell and price
-    message_type = OuchClientMessages.EnterOrder
-    G = Greeter()   
-    request = message_type(
-      order_token='{:014d}'.format(1000).encode('ascii'),
-      buy_sell_indicator='B',
-      shares=10,
-      stock=b'AMAZGOOG',
-      price=1000,
-      time_in_force=10000,
-      firm=b'OUCH',
-      display=b'N',
-      capacity=b'O',
-      intermarket_sweep_eligibility=b'N',
-      minimum_quantity=1,
-      cross_type=b'N',
-      customer_type=b' ')
-    (self.test).G.sendMessage(request)
+  factory = protocol.ClientFactory()
+  factory.protocol = Maker_Client(1, 0)
 
 """
+class TraderFactory(ClientFactory):
+    protocol = Maker_Client
+
+    def __init__(self):
+        self.done = Deferred()
+
+    def clientConnectionFailed(self, connector, reason):
+        print('connection failed:', reason.getErrorMessage())
+        self.done.errback(reason)
+
+    def clientConnectionLost(self, connector, reason):
+        print('connection lost:', reason.getErrorMessage())
+        self.done.callback(None)
+
+def main(reactor):
+    factory = TraderFactory()
+    reactor.connectTCP('localhost', 8000, factory)
+    return factory.done
+
+
+if __name__ == '__main__':
+    task.react(main)
