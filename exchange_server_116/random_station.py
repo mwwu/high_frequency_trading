@@ -23,9 +23,10 @@ import re
 # import binascii
 from random import randrange
 import itertools
-import time
+import datetime
 import random
 import numpy
+import csv
 from multiprocessing import Process, Pool
 
 from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
@@ -96,6 +97,40 @@ class Trade_Station:
             else:
                 print("Please try again.")
 
+class CSVManager:
+    def __init__(self, userID):
+        now = datetime.datetime.now()
+        self.fileName = '{:04d}'.format(userID) + '_' + str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '_' + str(now.hour) + '-' + str(now.minute) + '.csv'
+        try:
+            # Check if a given .csv file exists.
+            file = open(self.fileName, 'r')
+            file.close()
+        except IOError:
+            with open(self.fileName, 'w') as history:
+                myFields = ['order_ID', 'status', 'direction', 'time_in_force', 'timestamp',
+                            'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
+                writer = csv.DictWriter(history, fieldnames=myFields)
+                writer.writeheader()
+                history.close()
+                    
+    def logLine(self, orderID, status, direction, time_in_force, timestamp, stock_price, stock_quantity, trader_cash, current_stock):
+        print('logging lne')
+        newRow = {'order_ID': orderID,
+                    'status': status,
+                    'direction': direction,
+                    'time_in_force': time_in_force,
+                    'timestamp': timestamp,
+                    'stock_price': stock_price,
+                    'stock_quantity': stock_quantity,
+                    'trader_cash': trader_cash,
+                    'current_stock': current_stock}
+        try:
+            with open(self.fileName, 'a') as history:
+                writer = csv.DictWriter(history, newRow.keys())
+                writer.writerow(newRow)
+                history.close()
+        except IOError:
+            print("Writer error")
 
 p = configargparse.ArgParser()
 p.add('--port', default=9001)
@@ -106,6 +141,7 @@ def trade(id):
     user = Trade_Station(1000000, id)
     log.basicConfig(level=log.DEBUG)
     log.debug(options)
+    csvManager = CSVManager(user.get_id())
 
     async def client():
         reader, writer = await asyncio.streams.open_connection(
@@ -133,7 +169,7 @@ def trade(id):
             response_msg = message_type.from_bytes(payload, header=False)
             return response_msg
 
-        # Tasks 1 and 5
+        # Builds the order message according to parameters passed.
         async def build_message():
             indicator = random.random()
             buy_sell_builder = 'S'
@@ -148,12 +184,14 @@ def trade(id):
             time_in_force_builder = 99999
             return [buy_sell_builder, shares_builder, price_builder, time_in_force_builder]
 
+        # Logs the message to the .csv file.
         async def update(ex_msg, client):
             parsed_token = output[18:32]
 
             price_and_shares = output.split(":", 3)[3]
             executed_shares = int(price_and_shares.split("@", 1)[0])
             executed_price = int(price_and_shares.split("@", 1)[1])
+            timestamp = output.split(":", 2)[1]
 
             print("output={}".format(output))
             cost = executed_price * executed_shares
@@ -173,8 +211,8 @@ def trade(id):
                     user.inventory[share_name[0]] -= executed_shares
                     if user.inventory[share_name[0]] == 0:
                         del user.inventory[share_name[0]]
-
-            client.summary()
+            print(user.order_tokens[parsed_token])
+            # csvManager.logLine(parsed_token, 'E', user.order_tokens[parsed_token], 99999, timestamp, executed_price, executed_shares, user.cash, user.inventory[share_name[0]])
 
         while True:
             message_type = OuchClientMessages.EnterOrder
@@ -225,12 +263,12 @@ def trade(id):
                     try:
                         response = await asyncio.wait_for(recv(), timeout=0.5)
                         log.info("Received response Ouch message: %s:%d", response, len(response))
-                    #     output = str(response)
-                    #     if output[0] == 'E':
-                    #         await update(output, user)
+                        output = str(response)
+                        if output[0] == 'E':
+                            await update(output, user)
                     except asyncio.TimeoutError:
                         break
-                await asyncio.sleep(10.0)
+                await asyncio.sleep(4.0)
 
         writer.close()
         asyncio.sleep(4.0)
