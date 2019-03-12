@@ -155,52 +155,55 @@ class CSVManager:
             self.stock = pullStock(lastLine)
         except IOError:
             with open(self.fileName, 'w') as history:
-                myFields = ['trader_ID', 'status', 'direction', 'time_in_force', 'timestamp',
+                myFields = ['order_ID', 'status', 'direction', 'time_in_force', 'timestamp',
                             'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
                 writer = csv.DictWriter(self.fileName, fieldnames=myFields)
                 writer.writeheader()
-                # passing in the parameters from into the designated fieldnames
-                writer.writerow({'order_ID': ,
-                                 'status': ,
-                                 'direction': ,
-                                 'time_in_force': ,
-                                 'timestamp': ,
-                                 'stock_price': ,
-                                 'stock_quantity': ,
-                                 'trader_cash': ,
-                                 'current_stock': })
+                # stores values into the designated fieldnames
+                while l1[i] is not None:
+                    info = getInfo.copy()
+                    writer.writerow({'order_ID': info[0],
+                                     'status': info[1],
+                                     'direction': info[2],
+                                     'time_in_force': info[3],
+                                     'timestamp': info[4],
+                                     'stock_price': info[5],
+                                     'stock_quantity': info[6],
+                                     'trader_cash': info[7],
+                                     'current_stock': "AMAZGOOG"})
             writer.close()
+    # passing in the parameters from Megan + Minh Anh
+    def getInfo(orderID, status, direction, timeIF, timestamp, stockP, stockQ, traderCash):
+        orderInfo = [orderID, status, direction, timeIF, timestamp, stockP, stockQ, traderCash]
+        return orderInfo
 
-    def readLastLine(fileName):
-        with open(fileName, 'r') as order_history:
-            for row in reversed(list(csv.reader(order_history))):
-                lastLine = row
-                break
-        order_history.close()
-        return lastLine
-
-    def pullLastOrderID(lastLine):
-        fullOrderID = lastLine[0]
-        orderNumberStr = fullOrderID[4:]
-        return int(orderNumberStr)
-
-    def pullCash(lastLine):
-        return lastLine[7]
-
-    def pullStock(lastLine):
-        return lastLine[8]
-
-    def getLastOrderID():
-        return self.lastOrderNo
-
-    def getStock():
-        return self.stock
-
-    def getCash():
-        return self.cash
-
-
-
+    # def readLastLine(fileName):
+    #     with open(fileName, 'r') as order_history:
+    #         for row in reversed(list(csv.reader(order_history))):
+    #             lastLine = row
+    #             break
+    #     order_history.close()
+    #     return lastLine
+    #
+    # def pullLastOrderID(lastLine):
+    #     fullOrderID = lastLine[0]
+    #     orderNumberStr = fullOrderID[4:]
+    #     return int(orderNumberStr)
+    #
+    # def pullCash(lastLine):
+    #     return lastLine[7]
+    #
+    # def pullStock(lastLine):
+    #     return lastLine[8]
+    #
+    # def getLastOrderID():
+    #     return self.lastOrderNo
+    #
+    # def getStock():
+    #     return self.stock
+    #
+    # def getCash():
+    #     return self.cash
 
 
 def main():
