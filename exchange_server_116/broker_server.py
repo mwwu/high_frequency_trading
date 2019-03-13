@@ -20,7 +20,7 @@ class ClientServer(protocol.Protocol):
         buyStock = {} # key is price, value is quantity
         sellStock = {} # key is price, value is quantity
 
-        #1. parse the message into our database
+        #1. parse the message into our database TODO:  this has to work with replace orders
         text1 = data.decode()
         token = text1.split(':')
         if (token[1][0] == 'B'):
@@ -35,12 +35,6 @@ class ClientServer(protocol.Protocol):
             buyStock[stockName[1]] = qShares[0]
         else:
             sellStock[stockName[1]] = qShares[0]
-
-        #print('Token = '+ token[0] + '\n'
-        #      + 'Buy or Selling = '+ token[1][0] + ' | '
-        #      + 'Quantity of Shares = '+ qShares[0] + ' | '
-        #      + 'Stock Name = '+ stockName[0] + ' | '
-        #      + 'Price = '+ stockName[1])
 
         #2. send OUCH message to exchange server
         request = OuchClientMessages.EnterOrder(
@@ -85,8 +79,7 @@ def main():
     factory = protocol.ServerFactory()
     factory.protocol = ClientServer
     factory.clients = []
-    # book used to keep track of all orders received from clients
-    factory.book = []
+    factory.book = [] # book used to keep track of all orders received from clients
 
     s = socket.socket()
     s.connect(('localhost', 9001))
