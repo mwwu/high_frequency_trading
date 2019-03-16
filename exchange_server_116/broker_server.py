@@ -4,7 +4,6 @@ import collections
 import socket
 from random import randrange
 
-
 class ClientServer(protocol.Protocol):
     def connectionMade(self):
         self.factory.clients.append(self)
