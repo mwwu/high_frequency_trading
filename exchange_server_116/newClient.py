@@ -1,3 +1,5 @@
+# Manual input client.
+
 # Goal: to first be able to read client's input and run it to Exchange
 #       second to get output from exchange server and save it
 #       third keep track of client's shares and cash
