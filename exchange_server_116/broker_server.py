@@ -1,48 +1,48 @@
 from twisted.internet import reactor, protocol
+from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
+import collections
 import socket
-from exchange_server_116.OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
+from random import randrange
 
-class Echo(protocol.Protocol):
-
+class ClientServer(protocol.Protocol):
     def connectionMade(self):
         self.factory.clients.append(self)
-        print("A connection was made")
+        print('client connected')
 
     def dataReceived(self, data):
+        traderID = self.factory.clients.index(self)
+
+        print('received from client', traderID, ': ' + data.decode())
         self.factory.book.append(data)
-        print('received: '+data.decode())
-        #self.transport.write(data)
-        for c in self.factory.clients:
-            c.transport.write(data)
 
-        # dictionaries
-        buyStock = {}
-        sellStock = {}
+        # dictionaries used to calculate BB and BO
+        buyStock = {} # key is price, value is quantity
+        sellStock = {} # key is price, value is quantity
 
-        #1. parse the message into our database
+        #1. parse the message into our database TODO:  this has to work with replace orders
         text1 = data.decode()
         token = text1.split(':')
         if (token[1][0] == 'B'):
           temp = token[1].split('B')
         else:
           temp = token[1].split('S')
-        shares = temp[1].split('x')
-        stock = shares[1].split('@')
+        qShares = temp[1].split('x')
+        stockName = qShares[1].split('@')
 
-        print('Token = '+ token[0] + '\n'
-              + 'Buy or Selling = '+ token[1][0] + ' | '
-              + 'Quantity of Shares = '+ shares[0] + ' | '
-              + 'Stock Name= '+ stock[0] + ' | '
-              + 'Price = '+ stock[1])
+        # appending to dictionaries
+        if (token[1][0] == 'B'):
+            buyStock[stockName[1]] = qShares[0]
+        else:
+            sellStock[stockName[1]] = qShares[0]
 
         #2. send OUCH message to exchange server
         request = OuchClientMessages.EnterOrder(
-            order_token='{:014d}'.format(0).encode('ascii'),
-            buy_sell_indicator=b'B',
-            shares=22,
-            stock=b'AMAZGOOG',
-            price=33,
-            time_in_force=44,
+            order_token='{:014d}'.format(traderID).encode('ascii'), #change to orderID after you figure that out
+            buy_sell_indicator=token[1][0].encode(),
+            shares=int(qShares[0]),
+            stock=stockName[0].encode(),
+            price=int(stockName[1]),
+            time_in_force=randrange(0,99999),
             firm=b'OUCH',
             display=b'N',
             capacity=b'O',
@@ -50,32 +50,42 @@ class Echo(protocol.Protocol):
             minimum_quantity=1,
             cross_type=b'N',
             customer_type=b' ')
-        #self.factory.exchangeServer.sendall(bytes(request))
-        self.factory.exchangeServer.sendmsg(data.decode())
+
+        self.factory.exchangeServer.sendall(bytes(request))
+
+        print('sent to exchange: ' + data.decode())
 
         #3. calculate best bid and best offer
+        i = 0
+        for key in sorted(buyStock):
+            i += 1
+            if (i == len(buyStock)):
+                bestBid = (key, buyStock[key])
+            bestBid = (key, buyStock[key])
+            break
+            #print ("%s: %s" % (key, buyStock[key]))
+        for key in sorted(sellStock):
+            bestOffer = (key, sellStock[key])
+            break
 
         #4. broadcast BB BO to all the clients
         for c in self.factory.clients:
-            # first is best bid, second is best offer
-            request = "2x3:5x6;"
+            request = "BB2x3BO5x6"
             c.transport.write(bytes(request.encode()))
-        
-        print("Data recieved")
+        print('sent to all clients: ' + request)
 
 def main():
-    """This runs the protocol on port 8000"""
     factory = protocol.ServerFactory()
-    factory.protocol = Echo
+    factory.protocol = ClientServer
     factory.clients = []
-    factory.book = []
+    factory.book = [] # book used to keep track of all orders received from clients
+
     s = socket.socket()
     s.connect(('localhost', 9001))
     factory.exchangeServer = s
-    reactor.listenTCP(8000,factory)
-    # will not exit run
-    reactor.run()
 
+    reactor.listenTCP(8000,factory)
+    reactor.run()
 
 # this only runs if the module was *not* imported
 if __name__ == '__main__':

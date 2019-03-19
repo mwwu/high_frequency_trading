@@ -1,4 +1,4 @@
-from exchange_server_116.state import OrderStatus, OrderType
+from state import OrderStatus, OrderType
 
 ## inventory class
 class Inventory:

@@ -1,5 +1,5 @@
 # https://nasdaqtrader.com/content/technicalsupport/specifications/TradingProducts/OUCH4.2.pdf
-from .protocol_message_primitives import *
+from OuchServer.protocol_message_primitives import *
 
 class OuchFields(ProtocolFieldEnum):
     msg_type = ('c', 'Identifies the type of this message')
@@ -45,7 +45,7 @@ class OuchFields(ProtocolFieldEnum):
 class OuchHeader(NamedFieldSequence):
     __slots__ = ('msg_type',)
     _protocol_fields = OuchFields
-    
+
     def __str__(self):
         return self.msg_type.decode('ASCII')
 
@@ -67,10 +67,10 @@ class OuchPayloadBase(NamedFieldSequence):
 class OuchMessage(ProtocolMessage):
     _HeaderCls = OuchHeader
     _PayloadBaseCls = OuchPayloadBase
-    
+
 class OuchMessageTypeSpec(MessageTypeSpec):
     _MessageCls = OuchMessage
- 
+
     def __init__(self, display_fmt, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if display_fmt is not None:
@@ -154,7 +154,7 @@ class OuchServerMessages(LookupByHeaderBytesMixin, OuchMessageTypeSpec,
 
     BestBidAndOffer = ('{timestamp}:{stock}:bid:{volume_at_best_bid}@{best_bid}:ask:{volume_at_best_ask}@{best_ask}',
             {'msg_type': b'Q'},
-            ['timestamp', 'stock', 'best_bid', 'volume_at_best_bid', 'best_ask', 
+            ['timestamp', 'stock', 'best_bid', 'volume_at_best_bid', 'best_ask',
              'volume_at_best_ask']
     )
     BrokenTrade = ('{timestamp}:XX{order_token}m{match_number}({reason})',

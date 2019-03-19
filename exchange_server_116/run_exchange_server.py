@@ -36,8 +36,8 @@ def main():
     loop = asyncio.get_event_loop()
     server = ProtocolMessageServer(OuchClientMessages)
     book_logger = BookLogger(options.book_log) if options.book_log is not None else None
-    
-    if options.mechanism == 'cda':        
+
+    if options.mechanism == 'cda':
         book = CDABook()
         exchange = Exchange(order_book = book,
                             order_reply = server.send_server_response,
@@ -49,11 +49,11 @@ def main():
         exchange = FBAExchange(order_book = book,
                             order_reply = server.send_server_response,
                             message_broadcast = server.broadcast_server_message,
-                            loop = loop, 
+                            loop = loop,
                             order_book_logger = book_logger,
                             interval = options.interval)
         exchange.start()
-    
+
     server.register_listener(exchange.process_message)
     server.start(loop)
 
