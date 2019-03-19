@@ -72,7 +72,6 @@ class ExchangeClient(Protocol):
     def dataReceived(self, data):
         #parse_OUCH(binascii.a2b_hex(raw_response))
 
-       
         #d = data.decode()
         #print("Exchange Server: ", d)
         
