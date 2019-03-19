@@ -1,62 +1,54 @@
 from twisted.internet.protocol import ServerFactory, ClientFactory, Protocol, Factory
-from twisted.internet import reactor
-from twisted.internet.endpoints import clientFromString, HostnameEndpoint
+from twisted.internet import reactor, protocol
 
-#handles exchange connection
+# -----------------------
+# ExchangeClient class: handles the connection to the exchange server
+# -----------------------
+
 class ExchangeClient(Protocol):
-    def connectionMade(self):
-        self.transport.write(b"Hi exchange, I am the broker")
-        print("1:", self)
 
+    def __init__(self, traderOrder):
+        self.traderOrder = traderOrder
+
+    # forward orders from traders to the exchange server
+    def connectionMade(self):
+        self.transport.write(self.traderOrder)
+
+    # handles exchange responses to orders
     def dataReceived(self, data):
         print("Exchange Server: ", data)
 
-    def send(self, exchangeClient, data):
-        print("should be sending...")
 
-    def sendMessage(self):
-        self.transport.write("Hi server, I finally work")
+# -----------------------
+# TraderServer class: handles the traders connecting to the broker
+# -----------------------
 
-#handles incoming traders
 class TraderServer(Protocol):
-    exchange = None
 
-    def __init__(self, exchange):
-        self.exchange = exchange
-
+    # set up a trader that connects to the broker
     def connectionMade(self):
-        self.transport.write(b"Hi trader, I am the broker")
+        print('client connected')
 
+    # handles the orders received from traders
     def dataReceived(self, data):
         print("Client: ", data)
-        self.exchange.sendMessage()
+
+        exchangeClientFactory = ClientFactory()
+        def exchangeProtocol():
+            return ExchangeClient(data)
+        exchangeClientFactory.protocol = exchangeProtocol
+        reactor.connectTCP("localhost", 8001, exchangeClientFactory)
 
 
-class TraderServerFactory(ServerFactory):
-    exchange = None
-
-    def __init__(self, exchange):
-        self.exchange = exchange
-
-    def buildProtocol(self, addr):
-        return TraderServer(self.exchange)
+# -----------------------
+# Main: Set up trader server to wait for connections
+# -----------------------
 
 def main():
-    #setting up to connect to exchange server
-    """
-    exchangeClientFactory = ClientFactory()
-    exchangeClientFactory.protocol = ExchangeClient
-    reactor.connectTCP("localhost", 8001, exchangeClientFactory)
-    """
-
-    exchangeEndpoint = HostnameEndpoint(reactor, 'localhost', 8001)
-    exchangeFactory = Factory.forProtocol(ExchangeClient)
-    exchange = ClientService(exchangeEndpoint, exchangeFactory)
-    exchange.sendAll(b"lskdjflsdkjf")
-    #setting up for traders to connect
-    reactor.listenTCP(8000, TraderServerFactory(exchange))
+    traderServerFactory = ServerFactory()
+    traderServerFactory.protocol = TraderServer
+    reactor.listenTCP(8000, traderServerFactory)
     reactor.run()
-
 
 if __name__ == '__main__':
     main()
