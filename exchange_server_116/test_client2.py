@@ -1,9 +1,4 @@
-#!/usr/bin/env python
-# Copyright (c) Twisted Matrix Laboratories.
-# See LICENSE for details.
-
 from __future__ import print_function
-
 from twisted.internet import task
 from twisted.internet.defer import Deferred
 from twisted.internet.protocol import ClientFactory
