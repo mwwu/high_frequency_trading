@@ -174,7 +174,7 @@ def trade(id):
             # e.g. A: 80139293594000:00010000000010(63):B144xAMAZGOOG@203:16
             elif msg_type == 'A':
                 timestamp = int(output.split(":")[1])
-                parsed_token = output[17:31]
+                parsed_token = output[18:32]
                 purchase_details = output.split(":")[3] # e.g. B144xAMAZGOOG@203
                 buy_sell = list(purchase_details)[0]
                 quantity = "".join((list(purchase_details.split("x")[0]))[1:])
@@ -184,7 +184,7 @@ def trade(id):
             # e.g. E: 80139293594000:00010000000010m14:18@201:6
             elif msg_type == 'E':
                 timestamp = int(output.split(":", 2)[1])
-                parsed_token = output[17:31]
+                parsed_token = output[18:32]
                 print(parsed_token)
                 price_and_shares = output.split(":", 3)[3]
                 quantity = int(price_and_shares.split("@", 1)[0])
