@@ -23,9 +23,10 @@ import re
 # import binascii
 from random import randrange
 import itertools
-import time
+import datetime
 import random
 import numpy
+import csv
 from multiprocessing import Process, Pool
 
 from OuchServer.ouch_messages import OuchClientMessages, OuchServerMessages
@@ -56,9 +57,8 @@ class Trade_Station:
                       self.ask_stocks))
 
 
-    def buy_share(self, share, price,
-                  amt):  # probably shouldnt use these functions because it is adding to inventory before
-        if share not in self.inventory:  # it has crossed
+    def buy_share(self, share, price,amt):
+        if share not in self.inventory:
             self.inventory[share] = amt
         else:
             self.inventory[share] += amt
@@ -66,10 +66,9 @@ class Trade_Station:
 
     def sell_share(self, share, price, amt):
         if share not in self.inventory:
-            print("You do not own these shares")
-        else:
-            self.inventory[share] -= amt
-            self.cash += amt * price
+            self.inventory[share] = 0
+        self.inventory[share] -= amt
+        self.cash += amt * price
 
     def get_id(self):
         return self.id
@@ -80,22 +79,39 @@ class Trade_Station:
     def get_inventory(self):
         return self.inventory
 
-    # Task 6: Add and Withdraw Cash from Wallet
-    def add_withdraw_cash(self):
-        print("Do you want to add or withdraw cash? ")
-        while (1):
-            add_or_withdraw = input("Type A for add and W for withdraw. ")
-            if (add_or_withdraw == 'A'):
-                add = input("How much money do you want to add? ")
-                self.cash += int(add)
-                break
-            elif (add_or_withdraw == 'B'):
-                sub = input("How much money do you want to withdraw? ")
-                self.cash -= int(sub)
-                break
-            else:
-                print("Please try again.")
-
+class CSVManager:
+    def __init__(self, userID):
+        now = datetime.datetime.now()
+        self.fileName = str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '_' + str(now.hour) + '-' + str(now.minute) + '_' + '{:04d}'.format(userID) + '.csv'
+        try:
+            # Check if a given .csv file exists.
+            file = open(self.fileName, 'r')
+            file.close()
+        except IOError:
+            with open(self.fileName, 'w') as history:
+                myFields = ['order_ID', 'status', 'direction', 'time_in_force', 'timestamp',
+                            'stock_price', 'stock_quantity', 'trader_cash', 'current_stock']
+                writer = csv.DictWriter(history, fieldnames=myFields)
+                writer.writeheader()
+                history.close()
+                    
+    def logLine(self, orderID, status, direction, time_in_force, timestamp, stock_price, stock_quantity, trader_cash, current_stock):
+        newRow = {'order_ID': orderID,
+                    'status': status,
+                    'direction': direction,
+                    'time_in_force': time_in_force,
+                    'timestamp': timestamp,
+                    'stock_price': stock_price,
+                    'stock_quantity': stock_quantity,
+                    'trader_cash': trader_cash,
+                    'current_stock': current_stock}
+        try:
+            with open(self.fileName, 'a', newline='') as history:
+                writer = csv.DictWriter(history, newRow.keys())
+                writer.writerow(newRow)
+                history.close()
+        except IOError:
+            print("Writer error")
 
 p = configargparse.ArgParser()
 p.add('--port', default=9001)
@@ -103,9 +119,10 @@ p.add('--host', default='127.0.0.1', help="Address of server")
 options, args = p.parse_known_args()
 
 def trade(id):
-    user = Trade_Station(1000000, id)
+    user = Trade_Station(0, id)
     log.basicConfig(level=log.DEBUG)
     log.debug(options)
+    csvManager = CSVManager(user.get_id())
 
     async def client():
         reader, writer = await asyncio.streams.open_connection(
@@ -133,13 +150,13 @@ def trade(id):
             response_msg = message_type.from_bytes(payload, header=False)
             return response_msg
 
-        # Tasks 1 and 5
+        # Builds the order message according to parameters passed.
         async def build_message():
             indicator = random.random()
+            prob_buy = 0.5
             buy_sell_builder = 'S'
-            if (indicator > 0.5):
+            if (indicator < prob_buy):
                 buy_sell_builder = 'B'
-
             shares_rate_avg = 150
             shares_builder = numpy.random.poisson(shares_rate_avg)
             mean_price = 200
@@ -148,33 +165,41 @@ def trade(id):
             time_in_force_builder = 99999
             return [buy_sell_builder, shares_builder, price_builder, time_in_force_builder]
 
-        async def update(ex_msg, client):
-            parsed_token = output[18:32]
+        # Logs the message to the .csv file.
+        async def update(output, client, msg_type):
+            # We don't need to log the failed attempts of user trading with itself:
+            if msg_type == 'Q':
+                return
+            # Order confirmed
+            # e.g. A: 80139293594000:00010000000010(63):B144xAMAZGOOG@203:16
+            elif msg_type == 'A':
+                timestamp = int(output.split(":")[1])
+                parsed_token = output[18:32]
+                purchase_details = output.split(":")[3] # e.g. B144xAMAZGOOG@203
+                buy_sell = list(purchase_details)[0]
+                quantity = "".join((list(purchase_details.split("x")[0]))[1:])
+                price = purchase_details.split("@")[1]
+                share_name = (purchase_details.split("x")[1]).split("@")[0]
+            # Order executed
+            # e.g. E: 80139293594000:00010000000010m14:18@201:6
+            elif msg_type == 'E':
+                timestamp = int(output.split(":", 2)[1])
+                parsed_token = output[18:32]
+                print(parsed_token)
+                price_and_shares = output.split(":", 3)[3]
+                quantity = int(price_and_shares.split("@", 1)[0])
+                price = int(price_and_shares.split("@", 1)[1])
+                buy_sell = user.order_tokens[parsed_token]
+                if parsed_token in user.order_tokens and buy_sell == 'B':
+                    share_name = [user.bid_stocks[i] for i in user.bid_stocks if i == parsed_token][0]
+                    user.buy_share(share_name, price, quantity)
 
-            price_and_shares = output.split(":", 3)[3]
-            executed_shares = int(price_and_shares.split("@", 1)[0])
-            executed_price = int(price_and_shares.split("@", 1)[1])
-
-            print("output={}".format(output))
-            cost = executed_price * executed_shares
-            print("\nHere is the parsed token:{}\n".format(parsed_token))
-            print("\nHere are the executed_shares {}\n".format(executed_shares))
-            print("\nHere are the executed_price {}\n".format(executed_price))
-            if parsed_token in user.order_tokens and user.order_tokens[parsed_token] == 'B':
-                user.cash -= cost
-                share_name = [user.bid_stocks[i] for i in user.bid_stocks if i == parsed_token]
-                user.inventory[share_name[0]] = executed_shares
-
-            elif parsed_token in user.order_tokens and user.order_tokens[parsed_token] == 'S':
-                user.cash += cost
-                share_name = [user.ask_stocks[i] for i in user.ask_stocks if i == parsed_token]
-
-                if share_name[0] in user.inventory:
-                    user.inventory[share_name[0]] -= executed_shares
-                    if user.inventory[share_name[0]] == 0:
-                        del user.inventory[share_name[0]]
-
-            client.summary()
+                elif parsed_token in user.order_tokens and buy_sell == 'S':
+                    share_name = [user.ask_stocks[i] for i in user.ask_stocks if i == parsed_token][0]
+                    user.sell_share(share_name, price, quantity)
+            to_log = [parsed_token, msg_type, buy_sell, 'X', timestamp, price, quantity, user.cash, user.inventory[share_name]]
+            print(to_log)
+            csvManager.logLine(parsed_token, msg_type, buy_sell, 'X', timestamp, price, quantity, user.cash, user.inventory[share_name])
 
         while True:
             message_type = OuchClientMessages.EnterOrder
@@ -186,9 +211,10 @@ def trade(id):
                 buy_sell = user_input[0]
                 userTokenPart = '{:04d}'.format(user.get_id())
                 orderTokenPart = '{:010d}'.format(index)
-                token = ('' + userTokenPart + orderTokenPart).encode('ascii')
-                bstock = b'AMAZGOOG'
-                stock = bstock.decode('ascii')
+                token = '' + userTokenPart + orderTokenPart
+                btoken = token.encode('ascii')
+                stock = 'AMAZGOOG'
+                bstock = stock.encode('ascii')
                 price = user_input[2]
                 num_shares = user_input[1]
                 time_in_force = user_input[3]
@@ -201,10 +227,10 @@ def trade(id):
                     user.ask_stocks[token] = stock
 
                 request = message_type(
-                     order_token=token,
+                     order_token=btoken,
                      buy_sell_indicator=binary_buysell,
                      shares=num_shares,
-                     stock=b'AMAZGOOG',
+                     stock=bstock,
                      price=price,
                      time_in_force=time_in_force,
                      firm=b'OUCH',
@@ -215,8 +241,14 @@ def trade(id):
                      cross_type=b'N',
                      customer_type=b' ')
 
+                if stock not in user.inventory:
+                    user.inventory[stock] = 0
                 log.info("Sending Ouch message: %s", request)
                 await send(request)
+                timestamp = int(datetime.datetime.now().timestamp())
+                to_log = [token, 'O', buy_sell, 'X', timestamp, price, num_shares, user.cash, user.inventory[stock]]
+                print(to_log)
+                csvManager.logLine(token, 'O', buy_sell, time_in_force, timestamp, price, num_shares, user.cash, user.inventory[stock])
 
                 response = await recv()
                 log.info("Received response Ouch message: %s:%d", response, len(response))
@@ -225,12 +257,11 @@ def trade(id):
                     try:
                         response = await asyncio.wait_for(recv(), timeout=0.5)
                         log.info("Received response Ouch message: %s:%d", response, len(response))
-                    #     output = str(response)
-                    #     if output[0] == 'E':
-                    #         await update(output, user)
+                        output = str(response)
+                        await update(output, user, output[0])
                     except asyncio.TimeoutError:
                         break
-                await asyncio.sleep(10.0)
+                await asyncio.sleep(4.0)
 
         writer.close()
         asyncio.sleep(4.0)
