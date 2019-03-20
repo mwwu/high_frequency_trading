@@ -21,8 +21,9 @@ To run a FBA instance with batch length of 3 seconds:
 
 ...............
 
-116 Instructions
+116 Instructions 
 
+0. Go to testing_broker branch
 
 1. run the exchange server
 ::
