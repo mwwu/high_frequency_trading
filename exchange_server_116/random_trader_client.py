@@ -83,11 +83,11 @@ class RandomTraderClient(Protocol):
 # -----------------------
 def main():
     inventory = Inventory(100, 1)
-    def randomTraderClient():
+    def protocol():
         return RandomTraderClient(inventory)
 
     factory = ClientFactory()
-    factory.protocol = randomTraderClient
+    factory.protocol = protocol
     reactor.connectTCP("localhost", 8000, factory)
     reactor.run()
 

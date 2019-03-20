@@ -119,7 +119,7 @@ class ExchangeClient(Protocol):
     # handles responses from exchange
     def dataReceived(self, data):
         reactor.callLater(0, self.broker.sendToTrader, data=data)
-        #reactor.callLater(1, self.broker.broadcastBBBO, data=data)
+        reactor.callLater(1, self.broker.broadcastBBBO, data=data)
 
 
     def sendOrder(self, orderID, order):
