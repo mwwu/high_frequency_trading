@@ -2,6 +2,14 @@ from twisted.internet.protocol import ServerFactory, ClientFactory, Protocol
 from twisted.internet import reactor
 from random import randrange
 from message_handler import decodeServerOUCH, decodeClientOUCH
+"""
+
+note for kristin: a likely reason for the incorrect BB/BO, 
+is that the exchange server processes crosses in batch, and
+then sends out the executed messages in another batch.
+incorrect/unintended misuse of asyncrounous function
+
+"""
 
 
 # -----------------------
@@ -30,21 +38,25 @@ class Broker():
     def sendToTrader(self, data):
         msg_type, msg = decodeServerOUCH(data) 
 
-        # order Accepted  
+        # order Accepted, add to broker's books
         if msg_type == b'A':
-            order_token = msg['order_token']
-            buy_sell_indicator = msg['buy_sell_indicator']
-            shares = msg['shares']
-            price = msg['price']
-            traderID= self.orders[order_token]
-
-            if buy_sell_indicator == b'B':
-                self.bids.append((price, order_token))
+            bid_offer = (msg['price'], msg['order_token'], msg['shares'])
+            if msg['buy_sell_indicator'] == b'B':
+                self.bids.append(bid_offer)
                 self.bids = sorted(self.bids)
-            elif buy_sell_indicator == b'S':
-                self.offers.append((price, order_token))
-                self.offers = sorted(self.bids, reverse=True)
+            elif msg['buy_sell_indicator'] == b'S':
+                self.offers.append(bid_offer)
+                self.offers = sorted(self.offers, reverse=True)
+            traderID= self.orders[msg['order_token']]
+            self.traders[traderID].transport.write(data)
 
+        # order Executed, remove from broker's books
+        elif msg_type == b'E':
+            print('executed: ', msg)
+
+            # TODO: implement executed!!!!!!
+            order_token = msg['order_token']
+            traderID= self.orders[order_token]
             self.traders[traderID].transport.write(data)
 
     # TODO: What to do if there are NO best bids / best off???
@@ -57,15 +69,15 @@ class Broker():
             for t in self.traders:
                 bb = 0
                 if len(self.bids) > 0:
-                    bb, x = self.bids[0]
+                    bb, x, y = self.bids[0]
                 bo = 0
                 if len(self.offers) > 0:
-                    bo, x = self.offers[0]
+                    bo, x, y = self.offers[0]
                 msg = "#BB" + str(bb) + ":BO" + str(bo)
                 t.transport.write(bytes(msg.encode()))
 
         #TODO calculate order imbalance here
-             
+
 
 # -----------------------
 # TraderServer class: handles the traders connecting to the broker
@@ -107,7 +119,7 @@ class ExchangeClient(Protocol):
     # handles responses from exchange
     def dataReceived(self, data):
         reactor.callLater(0, self.broker.sendToTrader, data=data)
-        reactor.callLater(1, self.broker.broadcastBBBO, data=data)
+        #reactor.callLater(1, self.broker.broadcastBBBO, data=data)
 
 
     def sendOrder(self, orderID, order):
