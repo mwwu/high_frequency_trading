@@ -230,10 +230,10 @@ class Taker_Client(LineReceiver):
     #         ['order_token', 'shares']
     #     )
 
-    message_type = OuchClientMessages.CancelOrder
+    message_type = OuchClientMessages.EnterOrder
     request = message_type (
       order_token='{:014d}'.format(1000).encode('ascii'),
-      msg_type = b'X'
+      #msg_type = b'X'
       buy_sell_indicator= Buy_or_Sell, shares=10,
       stock=b'AMAZGOOG',
       price=Price,
