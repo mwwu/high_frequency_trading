@@ -44,7 +44,8 @@ S_CONST = 1
 class Client(LineReceiver):
   def __init__(self):
     self.algorithms = "None"
-    self.inventory = Inventory(0,0) 
+    self.inventory = Inventory(0) 
+    self.id = 0
     self.order_tokens = {}  # key = order token and value = 'B' or 'S'
     self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
     self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
@@ -60,7 +61,6 @@ class Client(LineReceiver):
     while(algorithm != "None"):
       if(self.algorithm == "Maker"):
         
-      
   def set_algorithm(self, algorithm):
     self.algorithm = algorithm
 
