@@ -192,12 +192,12 @@ class Taker_Client(LineReceiver):
     print("received from server:", line)
 
   def dataReceived(self, data):
-	ch = chr(data[0]).encode('ascii')
-	if (ch == b'#'):
-		print("BB/BO: ", data)
-	else:
-		msg_type, msg = decodeServerOUCH(data)
-		print("SERVER SAYS: ", msg)
+	  ch = chr(data[0]).encode('ascii')
+	  if (ch == b'#'):
+		  print("BB/BO: ", data)
+	  else:
+		  msg_type, msg = decodeServerOUCH(data)
+		  print("SERVER SAYS: ", msg)
 
   def build_Message(self):
     #parameters: buy/sell and price
@@ -264,3 +264,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
