@@ -7,6 +7,8 @@ from twisted.python import log
 from twisted.internet.defer import Deferred
 
 from sys import stdout
+from exchange_server_116.maker_robot import Maker
+from exchange_server_116.random_trader_client import RandomTraderClient
 
 class Client():
   def __init__(self, client_id):
@@ -25,9 +27,12 @@ class Client():
 
   
   def run_algorithm(self, algorithm):
-    while(algorithm != "None"):
-      if(self.algorithm == "Maker"):
-	      maker_instance = Maker()
+      while algorithm != "None":
+          if self.algorithm == "Maker":
+              maker_instance = Maker()
+          elif self.algorithm == "Random":
+              random_instance = RandomTraderClient()
+
 
         
   def set_algorithm(self, algorithm):
