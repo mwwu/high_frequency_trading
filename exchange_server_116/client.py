@@ -8,23 +8,6 @@ from twisted.internet.defer import Deferred
 
 from sys import stdout
 
-#import make_connection
-
-
-
-aggressiveness = 0.5
-b_x = 0.5 #slider 
-b_y = 0.5 #slider 
-
-a_x = 0.5 #slider 
-a_y = 0.5 #slider 
-
-x = 1 #get from broker 
-y = 1 #get from broker
-
-
-S_CONST = 1
-
 class Client():
   def __init__(self, client_id):
     self.algorithms = "None"
