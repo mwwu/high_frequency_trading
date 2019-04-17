@@ -48,6 +48,10 @@ from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
 
+#refer to master/hft/trader.py
+from .utility import (MIN_BID, MAX_ASK)
+
+
 aggressiveness = 0.5
 b_x = 0.5 #slider 
 b_y = 0.5 #slider 
@@ -68,7 +72,6 @@ class Maker(LineReceiver):
   def new_ask(self):
     ask_price = self.client.best_bid - S_CONST * aggressiveness
     self.client.ask_i = ask_price
-
     return ask_price
 
   def new_bid(self):
@@ -92,7 +95,6 @@ class Maker(LineReceiver):
     """
     return a_x * x - a_y * y
 
-
   def latent_bid(bb, S, bid_aggressiveness):
     """
     LB(t)
@@ -110,7 +112,11 @@ class Maker(LineReceiver):
     return bo + S * sell_aggressiveness
 
   def connectionMade(self):
-    msg = str(self.build_Message())
+    msg = "" 
+    if self.best_bid > MIN_BID:
+      msg = str(self.build_Message('B'))
+    if self.best_offer < MAX_ASK:
+      msg = str(self.build_Message('S'))
     
     print("Message sent to broker printing..:\n")
     print(msg)
@@ -127,14 +133,19 @@ class Maker(LineReceiver):
     self.best_offer = 4
     self.connectionMade_2()
 
-  def build_Message(self):
+  def build_Message(self, Buy_or_Sell):
+    if(Buy_or_Sell == 'S'):
+      Price = self.new_ask() 
+    else:
+      Price = self.new_bid()
+
     #parameters: buy/sell and price
     message_type = OuchClientMessages.EnterOrder
     request = message_type (
       order_token='{:014d}'.format(1000).encode('ascii'), 
-      buy_sell_indicator='B', shares=10, 
+      buy_sell_indicator=Buy_or_Sell, shares=10, 
       stock=b'AMAZGOOG', 
-      price=1000, 
+      price=Price, 
       time_in_force=10000, 
       firm=b'OUCH',
       display=b'N', 
