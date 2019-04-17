@@ -7,10 +7,14 @@ from twisted.python import log
 from twisted.internet.defer import Deferred
 
 from sys import stdout
-from exchange_server_116.maker_robot import Maker
-from exchange_server_116.random_trader_client import RandomTraderClient
+from maker_robot import Maker
+from random_trader_client import RandomTraderClient
+from inventory import Inventory
+from twisted.internet.protocol import Factory
+from twisted.internet import reactor, protocol
 
-class Client():
+
+class Client(protocol.Protocol):
   def __init__(self, client_id):
     self.algorithms = "None"
     self.inventory = Inventory(0) 
@@ -25,7 +29,7 @@ class Client():
     self.bid_i = 0
     self.ask_i = 0
 
-  
+#=======Algorithm methods==========================
   def run_algorithm(self, algorithm):
       while algorithm != "None":
           if self.algorithm == "Maker":
@@ -33,8 +37,6 @@ class Client():
           elif self.algorithm == "Random":
               random_instance = RandomTraderClient()
 
-
-        
   def set_algorithm(self, algorithm):
     self.algorithm = algorithm
 
@@ -92,5 +94,31 @@ class Client():
     if self.inventory.inventory[share_name[0]] == 0:
       del self.inventory.inventory[share_name[0]]
 
+
+#======Twisted connection methods=================
+  def connectionMade(self):
+      self.transport.write("client %s has connected\n", self.id)
+
+  def dataReceived(self, data):
+      print("Received data:",data)
+      self.transport.loseConnection()
+
+#Look at megan's test_broker
+#which is the connection object that i can grab? is it from buildProtocol?
+#=====ClientFactory=========================
+
+class ClientFactory(protocol.ClientFactory):
+
+    protocol = Client
+
+    def clientConnectionFailed(self, connector, reason):
+        print ('connection failed:', reason.getErrorMessage())
+
+    def clientConnectionLost(self, connector, reason):
+        print ('connection lost:', reason.getErrorMessage())
+
+
+reactor.connectTCP('localhost', 8000, ClientFactory())
+reactor.run()
 
 
