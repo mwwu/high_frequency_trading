@@ -49,7 +49,7 @@ from make_connection import gotProtocol
 from twisted.protocols.basic import LineReceiver
 
 #refer to master/hft/trader.py
-from .utility import (MIN_BID, MAX_ASK)
+# from .utility import (MIN_BID, MAX_ASK)
 
 
 aggressiveness = 0.5
@@ -156,4 +156,11 @@ class Maker(LineReceiver):
       customer_type=b' '
     )
     return request
+
+
+def main():
+    print("in main of maker_robot")
+
+if __name__ == '__main__':
+    main()
 
