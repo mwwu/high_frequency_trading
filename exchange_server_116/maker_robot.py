@@ -47,7 +47,7 @@ from make_connection import Greeter
 from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
-
+from client import ClientConnectionFactory
 #refer to master/hft/trader.py
 # from .utility import (MIN_BID, MAX_ASK)
 
@@ -64,6 +64,9 @@ y = 1 #get from broker
 
 
 S_CONST = 1
+
+MIN_BID = 1
+MAX_ASK = 1
 
 #class Maker_Client(irc.IRCClient):
 #class Maker_Client(Protocol):
@@ -157,9 +160,13 @@ class Maker(LineReceiver):
     )
     return request
 
-
+#connection to broker is made but something is wrong and it kills the broker.
 def main():
-    print("in main of maker_robot")
+    factory = ClientConnectionFactory()
+    reactor.connectTCP('localhost',8000,factory)
+    reactor.run()
+    conn = factory.connection
+
 
 if __name__ == '__main__':
     main()

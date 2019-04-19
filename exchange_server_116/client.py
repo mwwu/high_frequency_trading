@@ -1,20 +1,17 @@
 
 from __future__ import print_function
 from twisted.internet.protocol import ClientFactory, Protocol
-from maker_robot import Maker
-from random_trader_client import RandomTraderClient
+# from maker_robot import Maker
+# from random_trader_client import RandomTraderClient
 from inventory import Inventory
 from twisted.internet import reactor, protocol
 
 
 
-client_reactor = reactor
-
-class Client(protocol.Protocol):
-    def __init__(self, client_id):
+class Client(Protocol):
+    def __init__(self):
         self.algorithms = "None"
         self.inventory = Inventory(0)
-        self.id = client_id
         self.order_tokens = {}  # key = order token and value = 'B' or 'S'
         self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
         self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
@@ -26,13 +23,12 @@ class Client(protocol.Protocol):
         self.ask_i = 0
 
 #=======Algorithm methods==========================
-    def run_algorithm(self, algorithm):
-        while algorithm != "None":
-            if self.algorithm == "Maker":
-              # maker_instance = Maker()
-                print("in Maker")
-            elif self.algorithm == "Random":
-                random_instance = RandomTraderClient()
+    # def run_algorithm(self, algorithm):
+    #     while algorithm != "None":
+    #         if self.algorithm == "Maker":
+    #             maker_instance = Maker()
+    #         elif self.algorithm == "Random":
+    #             random_instance = RandomTraderClient()
 
     def set_algorithm(self, algorithm):
         self.algorithm = algorithm
@@ -101,19 +97,18 @@ class Client(protocol.Protocol):
         print("Received data:",data)
         self.transport.loseConnection()
 
-#Look at megan's test_broker
-#which is the connection object that i can grab? is it from buildProtocol?
-#is reactor the global connection object that is to be shared? or do i do persistent connections?
-#let maker take the reactor and then addcallbacks?
 # =====ClientFactory=========================
 
-class TestClientFactory(protocol.ClientFactory):
+class ClientConnectionFactory(ClientFactory):
+
     protocol = Client
-    def __init__(self, quote):
-        self.quote = quote
+    def __init__(self):
+        super()
+        self.connection = None
 
     def buildProtocol(self, addr):
-        return Client(self)
+        self.connection = ClientFactory.buildProtocol(self, addr)
+        return self.connection
 
     def clientConnectionFailed(self, connector, reason):
         print ('connection failed:', reason.getErrorMessage())
@@ -128,8 +123,8 @@ class TestClientFactory(protocol.ClientFactory):
 
 def main():
     msg = "ahahah"
-    client_reactor.connectTCP('localhost', 8000, TestClientFactory(msg.encode(encoding='UTF-8')))
-    client_reactor.run()
+    reactor.connectTCP('localhost', 8000, ClientConnectionFactory())
+    reactor.run()
     print("finished")
 
 
