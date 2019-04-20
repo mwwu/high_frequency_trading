@@ -91,7 +91,7 @@ class Client(Protocol):
 #======Twisted connection methods=================
     def connectionMade(self):
         print("connection made!")
-        self.transport.write("client %s has connected\n".encode(encoding='UTF-8'))
+        #now we just need to build and send a message to the broker!
 
     def dataReceived(self, data):
         print("Received data:",data)
@@ -124,11 +124,7 @@ class ClientConnectionFactory(ClientFactory):
         reactor.run()
 
 
-
-
-
 def main():
-    msg = "ahahah"
     reactor.connectTCP('localhost', 8000, ClientConnectionFactory())
     reactor.run()
     print("finished")

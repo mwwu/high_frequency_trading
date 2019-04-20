@@ -4,7 +4,7 @@ from random import randrange
 from message_handler import decodeServerOUCH, decodeClientOUCH
 """
 
-note for kristin: a likely reason for the incorrect BB/BO, 
+note for kristian: a likely reason for the incorrect BB/BO, 
 is that the exchange server processes crosses in batch, and
 then sends out the executed messages in another batch.
 incorrect/unintended misuse of asyncrounous function

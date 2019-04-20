@@ -168,6 +168,7 @@ def main():
     conn = factory.connection
     print("cash is {}".format( conn.get_cash()))
     factory.connectToBroker(('localhost',8000))
+    print("finished with maker")
 
 
 
