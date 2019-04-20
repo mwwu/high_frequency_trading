@@ -36,8 +36,8 @@ class Client(Protocol):
     def get_algorithm(self):
         return self.algorithm
 
-    def get_id(self):
-        return self.id
+    # def get_id(self):
+    #     return self.id
 
     def get_cash(self):
         return self.inventory.cash
@@ -107,6 +107,7 @@ class ClientConnectionFactory(ClientFactory):
         self.connection = None
 
     def buildProtocol(self, addr):
+        print("inside buildProtocol of factory")
         self.connection = ClientFactory.buildProtocol(self, addr)
         return self.connection
 
@@ -117,6 +118,11 @@ class ClientConnectionFactory(ClientFactory):
     def clientConnectionLost(self, connector, reason):
         print ('connection lost:', reason.getErrorMessage())
         reactor.stop()
+
+    def connectToBroker(self, addr):
+        reactor.connectTCP('localhost',8000, self)
+        reactor.run()
+
 
 
 

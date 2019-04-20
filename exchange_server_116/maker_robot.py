@@ -160,12 +160,15 @@ class Maker(LineReceiver):
     )
     return request
 
-#connection to broker is made but something is wrong and it kills the broker.
+#great now we have the connection. we can use whatever methods are in Client protocol with connection
+#but broker still breaks when connected
 def main():
     factory = ClientConnectionFactory()
-    reactor.connectTCP('localhost',8000,factory)
-    reactor.run()
+    factory.buildProtocol(('localhost', 8000))
     conn = factory.connection
+    print("cash is {}".format( conn.get_cash()))
+    factory.connectToBroker(('localhost',8000))
+
 
 
 if __name__ == '__main__':
