@@ -47,9 +47,14 @@ from make_connection import Greeter
 from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
-from client import ClientConnectionFactory
+
+#from client import Client, ClientConnectionFactory
+from client import Client, ClientConnectionFactory
 #refer to master/hft/trader.py
-# from .utility import (MIN_BID, MAX_ASK)
+#import sys
+#sys.path.append('../hft/utility')
+#from utility import (MIN_BID, MAX_ASK)
+#from high_frequency_trading.hft.utility import (MIN_BID, MAX_ASK)
 
 
 aggressiveness = 0.5
@@ -71,6 +76,9 @@ MAX_ASK = 1
 #class Maker_Client(irc.IRCClient):
 #class Maker_Client(Protocol):
 class Maker(LineReceiver):
+  def __init__(self, client=Client("Maker")):
+    self.client = client
+    
 
   def new_ask(self):
     ask_price = self.client.best_bid - S_CONST * aggressiveness

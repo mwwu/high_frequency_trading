@@ -6,11 +6,13 @@ from twisted.internet.protocol import ClientFactory, Protocol
 from inventory import Inventory
 from twisted.internet import reactor, protocol
 
-
+#from maker_robot import Maker 
+#from maker_robot import Maker, main
+#from maker_robot import *
 
 class Client(Protocol):
-    def __init__(self):
-        self.algorithms = "None"
+    def __init__(self, algorithm = "None"):
+        self.algorithms = algorithm
         self.inventory = Inventory(0)
         self.order_tokens = {}  # key = order token and value = 'B' or 'S'
         self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
@@ -23,12 +25,12 @@ class Client(Protocol):
         self.ask_i = 0
 
 #=======Algorithm methods==========================
-    # def run_algorithm(self, algorithm):
-    #     while algorithm != "None":
-    #         if self.algorithm == "Maker":
-    #             maker_instance = Maker()
-    #         elif self.algorithm == "Random":
-    #             random_instance = RandomTraderClient()
+#    def run_algorithm(self):
+#         while self.algorithm != "None":
+#             if self.algorithm == "Maker":
+#                 maker_instance = Maker()
+#             elif self.algorithm == "Random":
+#                 random_instance = RandomTraderClient()
 
     def set_algorithm(self, algorithm):
         self.algorithm = algorithm
