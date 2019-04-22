@@ -77,20 +77,24 @@ MAX_ASK = 1
 #class Maker_Client(Protocol):
 class Maker(LineReceiver):
   def __init__(self, client=Client("Maker")):
+    print("\n MAKER_ROBOT: inside __init__()\n")
     self.client = client
     
 
   def new_ask(self):
+    print("\n MAKER_ROBOT: inside new_ask()\n")
     ask_price = self.client.best_bid - S_CONST * aggressiveness
     self.client.ask_i = ask_price
     return ask_price
 
   def new_bid(self):
+    print("\n MAKER_ROBOT: inside new_bid()\n")
     bid_price = self.client.best_offer - S_CONST * aggressiveness
     self.client.bid_i = bid_price
     return bid_price
 
   def bid_aggressiveness(b_x, b_y, x, y):
+    print("\n MAKER_ROBOT: inside bid_aggressiveness()\n")
     """
     B(x(t), y(t))
     x: order imbalance
@@ -99,6 +103,7 @@ class Maker(LineReceiver):
     return - b_x * x + b_y * y
 
   def sell_aggressiveness(a_x, a_y, x, y):
+    print("\n MAKER_ROBOT: inside sell_aggressiveness()\n")
     """
     A(x(t), y(t))
     x: order imbalance
@@ -107,6 +112,7 @@ class Maker(LineReceiver):
     return a_x * x - a_y * y
 
   def latent_bid(bb, S, bid_aggressiveness):
+    print("\n MAKER_ROBOT: inside latent_bid()\n")
     """
     LB(t)
     bb: best bid
@@ -115,6 +121,7 @@ class Maker(LineReceiver):
     return bb - S * bid_aggressiveness
 
   def latent_offer(bo, S, sell_aggressiveness):
+    print("\n MAKER_ROBOT: inside latent_offer()\n")
     """
     LB(t)
     bb: best offer
@@ -123,6 +130,7 @@ class Maker(LineReceiver):
     return bo + S * sell_aggressiveness
 
   def connectionMade(self):
+    print("\n MAKER_ROBOT: inside connectionMade()\n")
     msg = "" 
     if self.best_bid > MIN_BID:
       msg = str(self.build_Message('B'))
@@ -135,9 +143,11 @@ class Maker(LineReceiver):
     self.transport.write(bytes((msg).encode()))
 
   def lineReceived(self, line):
+    print("\n MAKER_ROBOT: inside lineReceived()\n")
     print("received from server:", line)
 
   def dataReceived(self, data):
+    print("\n MAKER_ROBOT: inside dataReceived()\n")
     print("data received from server:", data.decode())
     #BB2x3BO5x6
     self.best_bid = 3
@@ -145,6 +155,7 @@ class Maker(LineReceiver):
     self.connectionMade_2()
 
   def build_Message(self, Buy_or_Sell):
+    print("\n MAKER_ROBOT: inside build_Message()\n")
     if(Buy_or_Sell == 'S'):
       Price = self.new_ask() 
     else:
@@ -168,9 +179,21 @@ class Maker(LineReceiver):
     )
     return request
 
+  #great now we have the connection. we can use whatever methods are in Client protocol with connection
+  #but broker still breaks when connected
+  def begin_maker(self):
+    print("\n MAKER_ROBOT: inside begin_maker()\n")
+    factory = ClientConnectionFactory()
+    factory.buildProtocol(('localhost', 8000))
+    conn = factory.connection
+    print("cash is {}".format( conn.get_cash()))
+    factory.connectToBroker(('localhost',8000))
+    print("finished with maker")
+
 #great now we have the connection. we can use whatever methods are in Client protocol with connection
 #but broker still breaks when connected
 def main():
+    print("\n MAKER_ROBOT: inside main()\n")
     factory = ClientConnectionFactory()
     factory.buildProtocol(('localhost', 8000))
     conn = factory.connection

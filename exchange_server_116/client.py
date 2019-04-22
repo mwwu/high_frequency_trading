@@ -31,6 +31,10 @@ class Client(Protocol):
 #                 maker_instance = Maker()
 #             elif self.algorithm == "Random":
 #                 random_instance = RandomTraderClient()
+    def connect_client(self):
+        print("\nInside connect_client\n")
+        reactor.connectTCP('localhost', 8000, ClientConnectionFactory())
+        reactor.run()
 
     def set_algorithm(self, algorithm):
         self.algorithm = algorithm
