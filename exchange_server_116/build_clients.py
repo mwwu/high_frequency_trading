@@ -16,7 +16,7 @@ def main():
   print("\n... maker_instance = Maker(trader1) executed ...\n")
 
   maker_instance.begin_maker()
-  maker_instance.build_Message()
+  #maker_instance.build_Message()
   print("\n... maker_instance.begin_maker() executed ...\n")
 
   #trader1.run_algorith

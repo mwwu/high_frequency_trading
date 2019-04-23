@@ -39,10 +39,10 @@ class Client(Protocol):
         reactor.run()
 
     def set_algorithm(self, algorithm):
-        self.algorithm = algorithm
+        self.algorithms = algorithm
 
     def get_algorithm(self):
-        return self.algorithm
+        return self.algorithms
 
     # def get_id(self):
     #     return self.id
@@ -99,7 +99,7 @@ class Client(Protocol):
 #======Twisted connection methods=================
     def connectionMade(self):
         print("connection made!")
-        if(self.algorithm == "Makers"):
+        if(self.algorithms == "Makers"):
             maker_instance = Maker(self)
             maker_instance.begin_maker()
             #maker_instance.build_message()

@@ -48,14 +48,7 @@ from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
 
-#from client import Client, ClientConnectionFactory
 from client import Client, ClientConnectionFactory
-#refer to master/hft/trader.py
-#import sys
-#sys.path.append('../hft/utility')
-from hft.utility import (MIN_BID, MAX_ASK)
-#from high_frequency_trading.hft.utility import (MIN_BID, MAX_ASK)
-
 
 aggressiveness = 0.5
 b_x = 0.5 #slider 
@@ -70,8 +63,8 @@ y = 1 #get from broker
 
 S_CONST = 1
 
-MIN_BID = 1
-MAX_ASK = 1
+MAX_ASK = 2147483647
+MIN_BID = 0
 
 #class Maker_Client(irc.IRCClient):
 #class Maker_Client(Protocol):
@@ -132,9 +125,9 @@ class Maker(LineReceiver):
   def connectionMade(self):
     print("\n MAKER_ROBOT: inside connectionMade()\n")
     msg = "" 
-    if self.best_bid > MIN_BID:
+    if self.client.best_bid > MIN_BID:
       msg = str(self.build_Message('B'))
-    if self.best_offer < MAX_ASK:
+    if self.client.best_offer < MAX_ASK:
       msg = str(self.build_Message('S'))
     
     print("Message sent to broker printing..:\n")
