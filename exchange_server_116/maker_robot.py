@@ -53,7 +53,7 @@ from client import Client, ClientConnectionFactory
 #refer to master/hft/trader.py
 #import sys
 #sys.path.append('../hft/utility')
-#from utility import (MIN_BID, MAX_ASK)
+from hft.utility import (MIN_BID, MAX_ASK)
 #from high_frequency_trading.hft.utility import (MIN_BID, MAX_ASK)
 
 
@@ -183,11 +183,11 @@ class Maker(LineReceiver):
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
-    factory = ClientConnectionFactory()
+    factory = self.client.connect
     factory.buildProtocol(('localhost', 8000))
     conn = factory.connection
     print("cash is {}".format( conn.get_cash()))
-    factory.connectToBroker(('localhost',8000))
+#    factory.connectToBroker(('localhost',8000))
     print("finished with maker")
 
 #great now we have the connection. we can use whatever methods are in Client protocol with connection

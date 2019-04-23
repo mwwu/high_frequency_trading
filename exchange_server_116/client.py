@@ -23,6 +23,7 @@ class Client(Protocol):
         self.best_offer = 0
         self.bid_i = 0
         self.ask_i = 0
+        self.connecton = ""
 
 #=======Algorithm methods==========================
 #    def run_algorithm(self):
@@ -33,7 +34,8 @@ class Client(Protocol):
 #                 random_instance = RandomTraderClient()
     def connect_client(self):
         print("\nInside connect_client\n")
-        reactor.connectTCP('localhost', 8000, ClientConnectionFactory())
+        self.connect = ClientConnectionFactory()
+        reactor.connectTCP('localhost', 8000, self.connect)
         reactor.run()
 
     def set_algorithm(self, algorithm):
@@ -97,6 +99,13 @@ class Client(Protocol):
 #======Twisted connection methods=================
     def connectionMade(self):
         print("connection made!")
+        if(self.algorithm == "Makers"):
+            maker_instance = Maker(self)
+            maker_instance.begin_maker()
+            #maker_instance.build_message()
+            maker_instance.connection_made()
+
+          
         #now we just need to build and send a message to the broker!
 
     def dataReceived(self, data):
@@ -132,7 +141,7 @@ class ClientConnectionFactory(ClientFactory):
 
 def main():
     reactor.connectTCP('localhost', 8000, ClientConnectionFactory())
-    reactor.run()
+   # reactor.run()
     print("finished")
 
 
