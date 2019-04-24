@@ -180,11 +180,7 @@ class Maker(LineReceiver):
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
-    factory = client.ClientConnectionFactory()
-    factory.buildProtocol(('localhost', 8000))
-    conn = factory.connection
-    print("cash is {}".format( conn.get_cash()))
-#    factory.connectToBroker(('localhost',8000))
+
     print("finished with maker")
 
 #great now we have the connection. we can use whatever methods are in Client protocol with connection
