@@ -48,7 +48,7 @@ from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
 
-from client import Client, ClientConnectionFactory
+#from client import Client, ClientConnectionFactory
 
 aggressiveness = 0.5
 b_x = 0.5 #slider 
@@ -69,7 +69,7 @@ MIN_BID = 0
 #class Maker_Client(irc.IRCClient):
 #class Maker_Client(Protocol):
 class Maker(LineReceiver):
-  def __init__(self, client=Client("Maker")):
+  def __init__(self, client):
     print("\n MAKER_ROBOT: inside __init__()\n")
     self.client = client
     
@@ -176,7 +176,6 @@ class Maker(LineReceiver):
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
-    factory = self.client.connect
     factory.buildProtocol(('localhost', 8000))
     conn = factory.connection
     print("cash is {}".format( conn.get_cash()))
