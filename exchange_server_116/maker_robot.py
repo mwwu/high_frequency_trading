@@ -48,7 +48,7 @@ from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
 
-#from client import Client, ClientConnectionFactory
+import client
 
 aggressiveness = 0.5
 b_x = 0.5 #slider 
@@ -170,7 +170,9 @@ class Maker(LineReceiver):
       cross_type=b'N', 
       customer_type=b' '
     )
-    return request
+    self.transport.write(request)
+
+
   def receive_message(self, data): 
     print("\ndata from receive_message: ", data)
 
@@ -178,6 +180,7 @@ class Maker(LineReceiver):
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
+    factory = client.ClientConnectionFactory()
     factory.buildProtocol(('localhost', 8000))
     conn = factory.connection
     print("cash is {}".format( conn.get_cash()))
@@ -188,12 +191,15 @@ class Maker(LineReceiver):
 #but broker still breaks when connected
 def main():
     print("\n MAKER_ROBOT: inside main()\n")
-    factory = ClientConnectionFactory()
+    factory = client.ClientConnectionFactory()
     factory.buildProtocol(('localhost', 8000))
     conn = factory.connection
+    print("connection:",conn)
     print("cash is {}".format( conn.get_cash()))
-    factory.connectToBroker(('localhost',8000))
-    print("finished with maker")
+    # factory.maker.build_Message('B')
+    factory.connectToBroker(("localhost", 8000))
+    # factory.connectToBroker(('localhost',8000))
+    # print("finished with maker")
 
 
 

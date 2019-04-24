@@ -116,11 +116,7 @@ class Client(Protocol):
             self.buffer.extend(data[:remainder])
             data = data[remainder:]
             self.factory.maker.receive_message(self,data)
-            except AttributeError as e:
-                log.exception(e)
-            finally:
-                self.buffer.clear()
-
+            self.buffer.clear()
         if len(data):
             self.dataReceived(data)
 # =====ClientFactory=========================
