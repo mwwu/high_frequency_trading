@@ -68,26 +68,27 @@ MIN_BID = 0
 
 #class Maker_Client(irc.IRCClient):
 #class Maker_Client(Protocol):
-class Maker(LineReceiver):
-  def __init__(self, client):
+class Maker(Protocol):
+  def __init__(self, clientFactory):
     print("\n MAKER_ROBOT: inside __init__()\n")
     self.bid_quantity = {}
     self.ask_quantity = {}
     self.best_bid = 0 
     self.best_offer = 0 
     self.bid_i = 0 
-    self.ask_i = 0  
+    self.ask_i = 0
+    self.clientFactory = clientFactory
 
   def new_ask(self):
     print("\n MAKER_ROBOT: inside new_ask()\n")
-    ask_price = self.client.best_bid - S_CONST * aggressiveness
-    self.client.ask_i = ask_price
+    ask_price = self.best_bid - S_CONST * aggressiveness
+    self.ask_i = ask_price
     return ask_price
 
   def new_bid(self):
     print("\n MAKER_ROBOT: inside new_bid()\n")
-    bid_price = self.client.best_offer - S_CONST * aggressiveness
-    self.client.bid_i = bid_price
+    bid_price = self.best_offer - S_CONST * aggressiveness
+    self.bid_i = bid_price
     return bid_price
 
   def bid_aggressiveness(b_x, b_y, x, y):
@@ -163,7 +164,8 @@ class Maker(LineReceiver):
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
-    print("finished with maker")
+    self.build_Message('B')
+
 
 #great now we have the connection. we can use whatever methods are in Client protocol with connection
 #but broker still breaks when connected
