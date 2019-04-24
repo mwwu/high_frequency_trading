@@ -171,6 +171,8 @@ class Maker(LineReceiver):
       customer_type=b' '
     )
     return request
+  def receive_message(self, data): 
+    print("\ndata from receive_message: ", data)
 
   #great now we have the connection. we can use whatever methods are in Client protocol with connection
   #but broker still breaks when connected

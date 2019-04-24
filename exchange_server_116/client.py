@@ -115,7 +115,7 @@ class Client(Protocol):
             remainder = bytes_needed
             self.buffer.extend(data[:remainder])
             data = data[remainder:]
-            self.factory.maker.recieve_message(self,data)
+            self.factory.maker.receive_message(self,data)
             except AttributeError as e:
                 log.exception(e)
             finally:
