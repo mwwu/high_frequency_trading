@@ -71,8 +71,12 @@ MIN_BID = 0
 class Maker(LineReceiver):
   def __init__(self, client):
     print("\n MAKER_ROBOT: inside __init__()\n")
-    self.client = client
-    
+    self.bid_quantity = {}
+    self.ask_quantity = {}
+    self.best_bid = 0 
+    self.best_offer = 0 
+    self.bid_i = 0 
+    self.ask_i = 0  
 
   def new_ask(self):
     print("\n MAKER_ROBOT: inside new_ask()\n")
@@ -122,23 +126,6 @@ class Maker(LineReceiver):
     """
     return bo + S * sell_aggressiveness
 
-  def connectionMade(self):
-    print("\n MAKER_ROBOT: inside connectionMade()\n")
-    msg = "" 
-    if self.client.best_bid > MIN_BID:
-      msg = str(self.build_Message('B'))
-    if self.client.best_offer < MAX_ASK:
-      msg = str(self.build_Message('S'))
-    
-    print("Message sent to broker printing..:\n")
-    print(msg)
-    print("Finished printing message to broker.\n")
-    self.transport.write(bytes((msg).encode()))
-
-  def lineReceived(self, line):
-    print("\n MAKER_ROBOT: inside lineReceived()\n")
-    print("received from server:", line)
-
   def dataReceived(self, data):
     print("\n MAKER_ROBOT: inside dataReceived()\n")
     print("data received from server:", data.decode())
@@ -172,15 +159,10 @@ class Maker(LineReceiver):
     )
     self.transport.write(request)
 
-
-  def receive_message(self, data): 
-    print("\ndata from receive_message: ", data)
-
   #great now we have the connection. we can use whatever methods are in Client protocol with connection
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
-
     print("finished with maker")
 
 #great now we have the connection. we can use whatever methods are in Client protocol with connection

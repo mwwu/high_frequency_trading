@@ -6,7 +6,7 @@ from twisted.internet.protocol import ClientFactory, Protocol
 from inventory import Inventory
 from twisted.internet import reactor, protocol
 
-from maker_robot import Maker 
+import maker_robot 
 #from maker_robot import Maker, main
 #from maker_robot import *
 
@@ -18,29 +18,6 @@ class Client(Protocol):
         self.order_tokens = {}  # key = order token and value = 'B' or 'S'
         self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
         self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
-        self.bid_quantity = {}
-        self.ask_quantity = {}
-        self.best_bid = 0
-        self.best_offer = 0
-        self.bid_i = 0
-        self.ask_i = 0
-
-#=======Algorithm methods==========================
-#    def run_algorithm(self):
-#         while self.algorithm != "None":
-#             if self.algorithm == "Maker":
-#                 maker_instance = Maker()
-#             elif self.algorithm == "Random":
-#                 random_instance = RandomTraderClient()
-
-    def set_algorithm(self, algorithm):
-        self.algorithm = algorithm
-
-    def get_algorithm(self):
-        return self.algorithm
-
-    # def get_id(self):
-    #     return self.id
 
     def get_cash(self):
         return self.inventory.cash
@@ -94,11 +71,6 @@ class Client(Protocol):
 #======Twisted connection methods=================
     def connectionMade(self):
         print("connection made!")
-       # if(self.algorithm == "Makers"):
-        #maker_instance = Maker(self)
-        #maker_instance.begin_maker()
-            #maker_instance.build_message()
-        #maker_instance.connection_made()
         self.factory.maker.begin_maker()
 
           
@@ -115,7 +87,7 @@ class Client(Protocol):
             remainder = bytes_needed
             self.buffer.extend(data[:remainder])
             data = data[remainder:]
-            self.factory.maker.receive_message(self,data)
+            self.factory.maker.dataReceived(self,data)
             self.buffer.clear()
         if len(data):
             self.dataReceived(data)
@@ -126,7 +98,7 @@ class ClientConnectionFactory(ClientFactory):
     protocol = Client
     def __init__(self):
         super()
-        self.maker = Maker(self)
+        self.maker = maker_robot.Maker(self)
 
         self.connection = None
 
