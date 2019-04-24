@@ -78,7 +78,7 @@ class Maker(Protocol):
     self.bid_i = 0 
     self.ask_i = 0
     self.clientFactory = clientFactory
-    self.connection = self.clientFactory.connection
+    #self.connection = self.clientFactory.connection
 
 
   def new_ask(self):
@@ -142,7 +142,7 @@ class Maker(Protocol):
       Price = self.new_ask() 
     else:
       Price = self.new_bid()
-
+    print("Finished getting new_bid/ask")
     #parameters: buy/sell and price
     message_type = OuchClientMessages.EnterOrder
     request = message_type (
@@ -159,13 +159,15 @@ class Maker(Protocol):
       cross_type=b'N', 
       customer_type=b' '
     )
-    self.connection.transport.write(request)
+    print("Finished creating a message. Ready to write.")
+    #self.connection.transport.write(request)
+    self.clientFactory.connection.transport.write(request)
 
   #great now we have the connection. we can use whatever methods are in Client protocol with connection
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
-    print("connection in maker is :", self.connection)
+    print("connection in maker is :", self.clientFactory.connection)
     self.build_Message('B')
 
 
