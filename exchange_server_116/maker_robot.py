@@ -164,9 +164,14 @@ class Maker(Protocol):
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
-    self.build_Message('B')
-
-
+    BuyOrSell = ''
+    if self.best_bid > MIN_BID:
+      BuyOrSell = 'B'
+    if self.best_offer < MAX_ASK:
+      BuyOrSell = 'S' 
+    msg =str(self.build_Message(BuyOrSell))
+    self.transport.write(bytes((msg).encode()))
+    
 #great now we have the connection. we can use whatever methods are in Client protocol with connection
 #but broker still breaks when connected
 def main():
