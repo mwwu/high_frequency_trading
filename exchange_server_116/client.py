@@ -98,13 +98,14 @@ class ClientConnectionFactory(ClientFactory):
     protocol = Client
     def __init__(self):
         super()
+        self.connection = self.buildProtocol(("localhost", 8000))
         self.maker = maker_robot.Maker(self)
 
-        self.connection = None
 
     def buildProtocol(self, addr):
         print("inside buildProtocol of factory")
         self.connection = ClientFactory.buildProtocol(self, addr)
+        print("self.connection:",self.connection)
         return self.connection
 
     def clientConnectionFailed(self, connector, reason):
