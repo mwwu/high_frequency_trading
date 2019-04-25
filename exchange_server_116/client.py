@@ -6,6 +6,7 @@ from twisted.internet.protocol import ClientFactory, Protocol
 from inventory import Inventory
 from twisted.internet import reactor, protocol
 
+from collections import deque
 import maker_robot 
 #from maker_robot import Maker, main
 #from maker_robot import *
@@ -22,6 +23,7 @@ class Client(Protocol):
     }
     def __init__(self, _algorithm = "None"):
         super()        
+        self.buffer = deque()
         self.algorithm = _algorithm 
         self.inventory = Inventory(0)
         self.order_tokens = {}  # key = order token and value = 'B' or 'S'
@@ -97,7 +99,7 @@ class Client(Protocol):
             remainder = bytes_needed
             self.buffer.extend(data[:remainder])
             data = data[remainder:]
-            self.factory.maker.dataReceived(self,data)
+            self.factory.maker.dataReceived(data)
             self.buffer.clear()
         if len(data):
             self.dataReceived(data)
