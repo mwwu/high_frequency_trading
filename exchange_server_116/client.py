@@ -67,13 +67,14 @@ class Client(Protocol):
         if self.inventory.inventory[share_name[0]] == 0:
             del self.inventory.inventory[share_name[0]]
 
+    def getProtocol():
+        return protocol
 
+  
 #======Twisted connection methods=================
     def connectionMade(self):
         print("connection made!")
         self.factory.maker.begin_maker()
-
-          
         #now we just need to build and send a message to the broker!
 
     def dataReceived(self, data):
@@ -91,6 +92,7 @@ class Client(Protocol):
             self.buffer.clear()
         if len(data):
             self.dataReceived(data)
+        
 # =====ClientFactory=========================
 
 class ClientConnectionFactory(ClientFactory):
@@ -100,7 +102,6 @@ class ClientConnectionFactory(ClientFactory):
         super()
         self.connection = self.buildProtocol(("localhost", 8000))
         self.maker = maker_robot.Maker(self)
-
 
     def buildProtocol(self, addr):
         print("inside buildProtocol of factory")

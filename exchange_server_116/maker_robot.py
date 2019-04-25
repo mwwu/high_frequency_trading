@@ -159,9 +159,11 @@ class Maker(Protocol):
       cross_type=b'N', 
       customer_type=b' '
     )
-    print("Finished creating a message. Ready to write.")
+    print(request)
+    print("\nFinished creating a message. Ready to write.")
     #self.connection.transport.write(request)
-    self.clientFactory.connection.transport.write(request)
+    msg = str(request)
+    self.clientFactory.connection.transport.write(bytes((msg).encode()))
 
   #great now we have the connection. we can use whatever methods are in Client protocol with connection
   #but broker still breaks when connected
@@ -169,7 +171,6 @@ class Maker(Protocol):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
     print("connection in maker is :", self.clientFactory.connection)
     self.build_Message('B')
-
 
 #great now we have the connection. we can use whatever methods are in Client protocol with connection
 #but broker still breaks when connected
