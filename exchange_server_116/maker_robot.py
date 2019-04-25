@@ -135,6 +135,7 @@ class Maker(Protocol):
     #BB2x3BO5x6
     self.best_bid = 3
     self.best_offer = 4
+    
 
   def build_Message(self, Buy_or_Sell):
     print("\n MAKER_ROBOT: inside build_Message()\n")
