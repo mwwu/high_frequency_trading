@@ -11,6 +11,15 @@ import maker_robot
 #from maker_robot import *
 
 class Client(Protocol):
+    bytes_needed = {
+        'B': 10,
+        'S': 10,
+        'E': 40,
+        'C': 28,
+        'U': 80,
+        'A': 66,
+        'Q': 33,
+    }
     def __init__(self, _algorithm = "None"):
         super()        
         self.algorithm = _algorithm 

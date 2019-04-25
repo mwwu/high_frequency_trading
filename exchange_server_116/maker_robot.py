@@ -149,7 +149,7 @@ class Maker(Protocol):
       order_token='{:014d}'.format(1000).encode('ascii'), 
       buy_sell_indicator=Buy_or_Sell, shares=10, 
       stock=b'AMAZGOOG', 
-      price=Price, 
+      price=5, 
       time_in_force=10000, 
       firm=b'OUCH',
       display=b'N', 
