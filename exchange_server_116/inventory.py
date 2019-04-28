@@ -2,8 +2,8 @@ from state import OrderStatus, OrderType
 
 ## inventory class
 class Inventory:
-    def __init__(self, cash, id):
-        self.id = id
+    def __init__(self, cash):
+        #self.id = id
         self.cash = cash
         self.inventory = {} # what stocks we have/own, key = stockname, value = quantity
 

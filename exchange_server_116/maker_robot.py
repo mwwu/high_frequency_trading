@@ -48,6 +48,8 @@ from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
 
+import client
+
 aggressiveness = 0.5
 b_x = 0.5 #slider 
 b_y = 0.5 #slider 
@@ -61,89 +63,38 @@ y = 1 #get from broker
 
 S_CONST = 1
 
+MAX_ASK = 2147483647
+MIN_BID = 0
+
 #class Maker_Client(irc.IRCClient):
 #class Maker_Client(Protocol):
-class Maker_Client(LineReceiver):
-  def __init__(self):
-    self.id = 0
-    self.cash = 0
-    self.inventory = {}
-    self.order_tokens = {}  # key = order token and value = 'B' or 'S'
-    self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
-    self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
+class Maker(Protocol):
+  def __init__(self, clientFactory):
+    print("\n MAKER_ROBOT: inside __init__()\n")
     self.bid_quantity = {}
     self.ask_quantity = {}
-    self.best_bid = 0
-    self.best_offer = 0
-    self.bid_i = 0
+    self.best_bid = 0 
+    self.best_offer = 0 
+    self.bid_i = 0 
     self.ask_i = 0
-    self.point = TCP4ClientEndpoint(reactor, "localhost", 8000)
-    self.test = 0
+    self.clientFactory = clientFactory
+    #self.connection = self.clientFactory.connection
 
-  def get_id(self):
-    return self.id
-
-  def get_cash(self):
-    return self.cash
-
-  def get_inventory(self):
-    return self.inventory
 
   def new_ask(self):
+    print("\n MAKER_ROBOT: inside new_ask()\n")
     ask_price = self.best_bid - S_CONST * aggressiveness
     self.ask_i = ask_price
     return ask_price
 
   def new_bid(self):
+    print("\n MAKER_ROBOT: inside new_bid()\n")
     bid_price = self.best_offer - S_CONST * aggressiveness
     self.bid_i = bid_price
     return bid_price
 
-# Task 6: Add and Withdraw Cash from Wallet
-  def add_withdraw_cash(self):
-    print("Do you want to add or withdraw cash? ")
-    while (1):
-      add_or_withdraw = input("Type A for add and W for withdraw. ")
-      if (add_or_withdraw == 'A'):
-        add = input("How much money do you want to add? ")
-        self.cash += int(add)
-        break;
-      elif (add_or_withdraw == 'B'):
-        sub = input("How much money do you want to withdraw? ")
-        self.cash -= int(sub)
-        break;
-      else:
-        print("Please try again.")
-
-
-  def update_cash_inventory(self, output):
-    parsed_token = output[18:32]
-
-    price_and_shares = output.split(":", 3)[3]
-    executed_shares = int(price_and_shares.split("@", 1)[0])
-    executed_price = int(price_and_shares.split("@", 1)[1])
-
-    print("output={}".format(output))
-    cost = executed_price * executed_shares
-    print("\nHere is the parsed token:{}\n".format(parsed_token))
-    print("\nHere are the executed_shares {}\n".format(executed_shares))
-    print("\nHere are the executed_price {}\n".format(executed_price))
-    if parsed_token in self.order_tokens and self.order_tokens[parsed_token] == 'B':
-      self.cash -= cost
-      share_name = [self.bid_stocks[i] for i in self.bid_stocks if i == parsed_token]
-      self.inventory[share_name[0]] = executed_shares
-
-    elif parsed_token in self.order_tokens and self.order_tokens[parsed_token] == 'S':
-      self.cash += cost
-      share_name = [self.ask_stocks[i] for i in self.ask_stocks if i == parsed_token]
-
-    if share_name[0] in self.inventory:
-      self.inventory[share_name[0]] -= executed_shares
-    if self.inventory[share_name[0]] == 0:
-      del self.inventory[share_name[0]]
-
-
   def bid_aggressiveness(b_x, b_y, x, y):
+    print("\n MAKER_ROBOT: inside bid_aggressiveness()\n")
     """
     B(x(t), y(t))
     x: order imbalance
@@ -152,6 +103,7 @@ class Maker_Client(LineReceiver):
     return - b_x * x + b_y * y
 
   def sell_aggressiveness(a_x, a_y, x, y):
+    print("\n MAKER_ROBOT: inside sell_aggressiveness()\n")
     """
     A(x(t), y(t))
     x: order imbalance
@@ -159,8 +111,8 @@ class Maker_Client(LineReceiver):
     """
     return a_x * x - a_y * y
 
-
   def latent_bid(bb, S, bid_aggressiveness):
+    print("\n MAKER_ROBOT: inside latent_bid()\n")
     """
     LB(t)
     bb: best bid
@@ -169,6 +121,7 @@ class Maker_Client(LineReceiver):
     return bb - S * bid_aggressiveness
 
   def latent_offer(bo, S, sell_aggressiveness):
+    print("\n MAKER_ROBOT: inside latent_offer()\n")
     """
     LB(t)
     bb: best offer
@@ -176,60 +129,28 @@ class Maker_Client(LineReceiver):
     """
     return bo + S * sell_aggressiveness
 
-  def connectionMade(self):
-    msg =str(self.build_Message())
-    
-    print("Message sent to broker printing..:\n")
-    print(msg)
-    print("Finished printing message to broker.\n")
-    self.transport.write(bytes((msg).encode()))
-
-  def connectionMade_2(self):
-    msg = str(self.build_Message_2('B'))
-    self.transport.write(bytes((msg).encode()))
-
-  def lineReceived(self, line):
-    print("received from server:", line)
-
   def dataReceived(self, data):
+    print("\n MAKER_ROBOT: inside dataReceived()\n")
     print("data received from server:", data.decode())
     #BB2x3BO5x6
     self.best_bid = 3
     self.best_offer = 4
-    self.connectionMade_2()
+    
 
-  def build_Message(self):
-    #parameters: buy/sell and price
-    message_type = OuchClientMessages.EnterOrder
-    request = message_type (
-      order_token='{:014d}'.format(1000).encode('ascii'), 
-      buy_sell_indicator='B', shares=10, 
-      stock=b'AMAZGOOG', 
-      price=1000, 
-      time_in_force=10000, 
-      firm=b'OUCH',
-      display=b'N', 
-      capacity=b'O', 
-      intermarket_sweep_eligibility=b'N', 
-      minimum_quantity=1, 
-      cross_type=b'N', 
-      customer_type=b' '
-    )
-    return request
-
-  def build_Message_2(self, Buy_or_Sell):
-    #parameters: buy/sell and price
+  def build_Message(self, Buy_or_Sell):
+    print("\n MAKER_ROBOT: inside build_Message()\n")
     if(Buy_or_Sell == 'S'):
       Price = self.new_ask() 
     else:
       Price = self.new_bid()
-
-    message_type = OuchClientMessages.ReplaceOrder
+    print("Finished getting new_bid/ask")
+    #parameters: buy/sell and price
+    message_type = OuchClientMessages.EnterOrder
     request = message_type (
       order_token='{:014d}'.format(1000).encode('ascii'), 
-      buy_sell_indicator= Buy_or_Sell, shares= 10000, 
+      buy_sell_indicator=Buy_or_Sell, shares=10, 
       stock=b'AMAZGOOG', 
-      price=Price, 
+      price=5, 
       time_in_force=10000, 
       firm=b'OUCH',
       display=b'N', 
@@ -239,32 +160,32 @@ class Maker_Client(LineReceiver):
       cross_type=b'N', 
       customer_type=b' '
     )
-    return request
+    print(request)
+    print("\nFinished creating a message. Ready to write.")
+    #self.connection.transport.write(request)
+    msg = str(request)
+    self.clientFactory.connection.transport.write(bytes((msg).encode()))
 
-"""
-  factory = protocol.ClientFactory()
-  factory.protocol = Maker_Client(1, 0)
+  #great now we have the connection. we can use whatever methods are in Client protocol with connection
+  #but broker still breaks when connected
+  def begin_maker(self):
+    print("\n MAKER_ROBOT: inside begin_maker()\n")
+    print("connection in maker is :", self.clientFactory.connection)
+    self.build_Message('B')
 
-"""
-class TraderFactory(ClientFactory):
-    protocol = Maker_Client
+#great now we have the connection. we can use whatever methods are in Client protocol with connection
+#but broker still breaks when connected
+def main():
+    print("\n MAKER_ROBOT: inside main()\n")
+    factory = client.ClientConnectionFactory()
+    conn = factory.connection
+    print("connection:", conn)
+    print("cash is {}".format( conn.get_cash()))
+    # factory.maker.build_Message('B')
+    # factory.connectToBroker(("localhost", 8000))
 
-    def __init__(self):
-        self.done = Deferred()
-
-    def clientConnectionFailed(self, connector, reason):
-        print('connection failed:', reason.getErrorMessage())
-        self.done.errback(reason)
-
-    def clientConnectionLost(self, connector, reason):
-        print('connection lost:', reason.getErrorMessage())
-        self.done.callback(None)
-
-def main(reactor):
-    factory = TraderFactory()
-    reactor.connectTCP('localhost', 8000, factory)
-    return factory.done
 
 
 if __name__ == '__main__':
-    task.react(main)
+    main()
+

@@ -4,7 +4,7 @@ from random import randrange
 from message_handler import decodeServerOUCH, decodeClientOUCH
 """
 
-note for kristin: a likely reason for the incorrect BB/BO, 
+note for kristian: a likely reason for the incorrect BB/BO, 
 is that the exchange server processes crosses in batch, and
 then sends out the executed messages in another batch.
 incorrect/unintended misuse of asyncrounous function
@@ -138,7 +138,6 @@ class ExchangeClient(Protocol):
     def dataReceived(self, data):
         reactor.callLater(0, self.broker.sendToTrader, data=data)
         reactor.callLater(1, self.broker.broadcastBBBO, data=data)
-
 
     def sendOrder(self, orderID, order):
         msg_type, msg = decodeClientOUCH(order)   
