@@ -2,14 +2,6 @@ from twisted.internet.protocol import ServerFactory, ClientFactory, Protocol
 from twisted.internet import reactor
 from random import randrange
 from message_handler import decodeServerOUCH, decodeClientOUCH
-"""
-
-note for kristin: a likely reason for the incorrect BB/BO, 
-is that the exchange server processes crosses in batch, and
-then sends out the executed messages in another batch.
-incorrect/unintended misuse of asyncrounous function
-
-"""
 
 """
 ORDER IMBALANCE EXAMPLE:
@@ -138,8 +130,13 @@ class ExchangeClient(Protocol):
     def dataReceived(self, data):
         reactor.callLater(0, self.broker.sendToTrader, data=data)
         reactor.callLater(1, self.broker.broadcastBBBO, data=data)
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> dcd7732cb7039974587ee48f86ec55bf21e213c5
     def sendOrder(self, orderID, order):
         msg_type, msg = decodeClientOUCH(order)   
         if (msg_type == b'O'):
