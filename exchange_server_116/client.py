@@ -141,7 +141,7 @@ class ClientConnectionFactory(ClientFactory):
 
 def main():
     reactor.connectTCP('localhost', 8000, ClientConnectionFactory())
-   # reactor.run()
+    reactor.run()
     print("finished")
 
 
