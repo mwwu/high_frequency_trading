@@ -48,7 +48,7 @@ from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
 
-from client import Client, ClientConnectionFactory
+import client
 
 aggressiveness = 0.5
 b_x = 0.5 #slider 
@@ -68,22 +68,29 @@ MIN_BID = 0
 
 #class Maker_Client(irc.IRCClient):
 #class Maker_Client(Protocol):
-class Maker(LineReceiver):
-  def __init__(self, client=Client("Maker")):
+class Maker(Protocol):
+  def __init__(self, clientFactory):
     print("\n MAKER_ROBOT: inside __init__()\n")
-    self.client = client
-    
+    self.bid_quantity = {}
+    self.ask_quantity = {}
+    self.best_bid = 0 
+    self.best_offer = 0 
+    self.bid_i = 0 
+    self.ask_i = 0
+    self.clientFactory = clientFactory
+    #self.connection = self.clientFactory.connection
+
 
   def new_ask(self):
     print("\n MAKER_ROBOT: inside new_ask()\n")
-    ask_price = self.client.best_bid - S_CONST * aggressiveness
-    self.client.ask_i = ask_price
+    ask_price = self.best_bid - S_CONST * aggressiveness
+    self.ask_i = ask_price
     return ask_price
 
   def new_bid(self):
     print("\n MAKER_ROBOT: inside new_bid()\n")
-    bid_price = self.client.best_offer - S_CONST * aggressiveness
-    self.client.bid_i = bid_price
+    bid_price = self.best_offer - S_CONST * aggressiveness
+    self.bid_i = bid_price
     return bid_price
 
   def bid_aggressiveness(b_x, b_y, x, y):
@@ -122,30 +129,13 @@ class Maker(LineReceiver):
     """
     return bo + S * sell_aggressiveness
 
-  def connectionMade(self):
-    print("\n MAKER_ROBOT: inside connectionMade()\n")
-    msg = "" 
-    if self.client.best_bid > MIN_BID:
-      msg = str(self.build_Message('B'))
-    if self.client.best_offer < MAX_ASK:
-      msg = str(self.build_Message('S'))
-    
-    print("Message sent to broker printing..:\n")
-    print(msg)
-    print("Finished printing message to broker.\n")
-    self.transport.write(bytes((msg).encode()))
-
-  def lineReceived(self, line):
-    print("\n MAKER_ROBOT: inside lineReceived()\n")
-    print("received from server:", line)
-
   def dataReceived(self, data):
     print("\n MAKER_ROBOT: inside dataReceived()\n")
     print("data received from server:", data.decode())
     #BB2x3BO5x6
     self.best_bid = 3
     self.best_offer = 4
-    self.connectionMade_2()
+    
 
   def build_Message(self, Buy_or_Sell):
     print("\n MAKER_ROBOT: inside build_Message()\n")
@@ -153,14 +143,14 @@ class Maker(LineReceiver):
       Price = self.new_ask() 
     else:
       Price = self.new_bid()
-
+    print("Finished getting new_bid/ask")
     #parameters: buy/sell and price
     message_type = OuchClientMessages.EnterOrder
     request = message_type (
       order_token='{:014d}'.format(1000).encode('ascii'), 
       buy_sell_indicator=Buy_or_Sell, shares=10, 
       stock=b'AMAZGOOG', 
-      price=Price, 
+      price=5, 
       time_in_force=10000, 
       firm=b'OUCH',
       display=b'N', 
@@ -170,29 +160,29 @@ class Maker(LineReceiver):
       cross_type=b'N', 
       customer_type=b' '
     )
-    return request
+    print(request)
+    print("\nFinished creating a message. Ready to write.")
+    #self.connection.transport.write(request)
+    msg = str(request)
+    self.clientFactory.connection.transport.write(bytes((msg).encode()))
 
   #great now we have the connection. we can use whatever methods are in Client protocol with connection
   #but broker still breaks when connected
   def begin_maker(self):
     print("\n MAKER_ROBOT: inside begin_maker()\n")
-    factory = self.client.connect
-    factory.buildProtocol(('localhost', 8000))
-    conn = factory.connection
-    print("cash is {}".format( conn.get_cash()))
-#    factory.connectToBroker(('localhost',8000))
-    print("finished with maker")
+    print("connection in maker is :", self.clientFactory.connection)
+    self.build_Message('B')
 
 #great now we have the connection. we can use whatever methods are in Client protocol with connection
 #but broker still breaks when connected
 def main():
     print("\n MAKER_ROBOT: inside main()\n")
-    factory = ClientConnectionFactory()
-    factory.buildProtocol(('localhost', 8000))
+    factory = client.ClientConnectionFactory()
     conn = factory.connection
+    print("connection:", conn)
     print("cash is {}".format( conn.get_cash()))
-    factory.connectToBroker(('localhost',8000))
-    print("finished with maker")
+    # factory.maker.build_Message('B')
+    # factory.connectToBroker(("localhost", 8000))
 
 
 

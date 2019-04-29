@@ -6,46 +6,29 @@ from twisted.internet.protocol import ClientFactory, Protocol
 from inventory import Inventory
 from twisted.internet import reactor, protocol
 
-#from maker_robot import Maker 
+from collections import deque
+import maker_robot 
 #from maker_robot import Maker, main
 #from maker_robot import *
 
 class Client(Protocol):
-    def __init__(self, algorithm = "None"):
-        self.algorithms = algorithm
+    bytes_needed = {
+        'B': 10,
+        'S': 10,
+        'E': 40,
+        'C': 28,
+        'U': 80,
+        'A': 66,
+        'Q': 33,
+    }
+    def __init__(self, _algorithm = "None"):
+        super()        
+        self.buffer = deque()
+        self.algorithm = _algorithm 
         self.inventory = Inventory(0)
         self.order_tokens = {}  # key = order token and value = 'B' or 'S'
         self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
         self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
-        self.bid_quantity = {}
-        self.ask_quantity = {}
-        self.best_bid = 0
-        self.best_offer = 0
-        self.bid_i = 0
-        self.ask_i = 0
-        self.connecton = ""
-
-#=======Algorithm methods==========================
-#    def run_algorithm(self):
-#         while self.algorithm != "None":
-#             if self.algorithm == "Maker":
-#                 maker_instance = Maker()
-#             elif self.algorithm == "Random":
-#                 random_instance = RandomTraderClient()
-    def connect_client(self):
-        print("\nInside connect_client\n")
-        self.connect = ClientConnectionFactory()
-        reactor.connectTCP('localhost', 8000, self.connect)
-        reactor.run()
-
-    def set_algorithm(self, algorithm):
-        self.algorithms = algorithm
-
-    def get_algorithm(self):
-        return self.algorithms
-
-    # def get_id(self):
-    #     return self.id
 
     def get_cash(self):
         return self.inventory.cash
@@ -95,23 +78,32 @@ class Client(Protocol):
         if self.inventory.inventory[share_name[0]] == 0:
             del self.inventory.inventory[share_name[0]]
 
+    def getProtocol():
+        return protocol
 
+  
 #======Twisted connection methods=================
     def connectionMade(self):
         print("connection made!")
-        if(self.algorithms == "Makers"):
-            maker_instance = Maker(self)
-            maker_instance.begin_maker()
-            #maker_instance.build_message()
-            maker_instance.connection_made()
-
-          
+        self.factory.maker.begin_maker()
         #now we just need to build and send a message to the broker!
 
     def dataReceived(self, data):
-        print("Received data:",data)
-        self.transport.loseConnection()
+        header = chr(data[0])
+        try:
+            bytes_needed = self.bytes_needed[header]
+        except KeyError:
+             raise ValueError('unknown header %s.' % header)
 
+        if len(data) >= bytes_needed:
+            remainder = bytes_needed
+            self.buffer.extend(data[:remainder])
+            data = data[remainder:]
+            self.factory.maker.dataReceived(data)
+            self.buffer.clear()
+        if len(data):
+            self.dataReceived(data)
+        
 # =====ClientFactory=========================
 
 class ClientConnectionFactory(ClientFactory):
@@ -119,11 +111,13 @@ class ClientConnectionFactory(ClientFactory):
     protocol = Client
     def __init__(self):
         super()
-        self.connection = None
+        self.connection = self.buildProtocol(("localhost", 8000))
+        self.maker = maker_robot.Maker(self)
 
     def buildProtocol(self, addr):
         print("inside buildProtocol of factory")
         self.connection = ClientFactory.buildProtocol(self, addr)
+        print("self.connection:",self.connection)
         return self.connection
 
     def clientConnectionFailed(self, connector, reason):
@@ -140,10 +134,10 @@ class ClientConnectionFactory(ClientFactory):
 
 
 def main():
-    reactor.connectTCP('localhost', 8000, ClientConnectionFactory())
+    print("\nInside connect_client\n")
+    factory = ClientConnectionFactory()
+    reactor.connectTCP('localhost', 8000, factory)
     reactor.run()
-    print("finished")
-
 
 if __name__ == '__main__':
     main()

@@ -4,22 +4,12 @@ from random import randrange
 from message_handler import decodeServerOUCH, decodeClientOUCH
 
 """
-ORDER IMBALANCE EXAMPLE:
-order_imbalance = 0
-tau = 0
 
-def dataReceived(self, data):
-    ...
+note for kristian: a likely reason for the incorrect BB/BO, 
+is that the exchange server processes crosses in batch, and
+then sends out the executed messages in another batch.
+incorrect/unintended misuse of asyncrounous function
 
-    tau = now() - tau
-
-    if (orderType == E):
-        if (BO):
-            order_imbalance = e^(-p*tau) * order_imbalance + 1
-        if (BB):
-            order_imbalance = e^(-p*tau) * order_imbalance - 1
-
-    ...
 """
 
 # -----------------------
@@ -131,12 +121,16 @@ class ExchangeClient(Protocol):
         reactor.callLater(0, self.broker.sendToTrader, data=data)
         reactor.callLater(1, self.broker.broadcastBBBO, data=data)
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 =======
 
 
 >>>>>>> dcd7732cb7039974587ee48f86ec55bf21e213c5
+=======
+
+>>>>>>> 5c0599f67389aae283598af9116ad658b6bf9421
     def sendOrder(self, orderID, order):
         msg_type, msg = decodeClientOUCH(order)   
         if (msg_type == b'O'):
