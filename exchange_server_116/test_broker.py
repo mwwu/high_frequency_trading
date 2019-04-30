@@ -120,17 +120,7 @@ class ExchangeClient(Protocol):
     def dataReceived(self, data):
         reactor.callLater(0, self.broker.sendToTrader, data=data)
         reactor.callLater(1, self.broker.broadcastBBBO, data=data)
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-
-=======
-
-
->>>>>>> dcd7732cb7039974587ee48f86ec55bf21e213c5
-=======
-
->>>>>>> 5c0599f67389aae283598af9116ad658b6bf9421
     def sendOrder(self, orderID, order):
         msg_type, msg = decodeClientOUCH(order)   
         if (msg_type == b'O'):
