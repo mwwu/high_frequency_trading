@@ -1,8 +1,10 @@
+Note: Using python 3
+
 Dependencies:
 
 ::
 
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 
 To run a CDA instance:
 
