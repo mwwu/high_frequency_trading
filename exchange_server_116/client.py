@@ -90,19 +90,22 @@ class Client(Protocol):
 
     def dataReceived(self, data):
         header = chr(data[0])
-        try:
-            bytes_needed = self.bytes_needed[header]
-        except KeyError:
-             raise ValueError('unknown header %s.' % header)
+        if (header == b'#'):
+            print("BB/BO: ", data)
+        else:
+            try:
+                bytes_needed = self.bytes_needed[header]
+            except KeyError:
+                 raise ValueError('unknown header %s.' % header)
 
-        if len(data) >= bytes_needed:
-            remainder = bytes_needed
-            self.buffer.extend(data[:remainder])
-            data = data[remainder:]
-            self.factory.maker.dataReceived(data)
-            self.buffer.clear()
-        if len(data):
-            self.dataReceived(data)
+            if len(data) >= bytes_needed:
+                remainder = bytes_needed
+                self.buffer.extend(data[:remainder])
+                data = data[remainder:]
+                self.factory.maker.dataReceived(data)
+                self.buffer.clear()
+            if len(data):
+                self.dataReceived(data)
         
 # =====ClientFactory=========================
 

@@ -122,7 +122,8 @@ class ExchangeClient(Protocol):
         reactor.callLater(1, self.broker.broadcastBBBO, data=data)
 
     def sendOrder(self, orderID, order):
-        msg_type, msg = decodeClientOUCH(order)   
+        print(order)
+        msg_type, msg = decodeClientOUCH(order) 
         if (msg_type == b'O'):
             order_token = '{:014d}'.format(orderID).encode('ascii')
             msg['order_token'] = order_token
