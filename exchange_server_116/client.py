@@ -5,6 +5,8 @@ from twisted.internet.protocol import ClientFactory, Protocol
 # from random_trader_client import RandomTraderClient
 from inventory import Inventory
 from twisted.internet import reactor, protocol
+from message_handler import decodeServerOUCH, decodeClientOUCH
+
 
 from collections import deque
 import maker_robot 
@@ -89,15 +91,17 @@ class Client(Protocol):
         #now we just need to build and send a message to the broker!
 
     def dataReceived(self, data):
-        header = chr(data[0])
+        header = chr(data[0]).encode('ascii')
         if (header == b'#'):
             print("BB/BO: ", data)
         else:
             try:
-                bytes_needed = self.bytes_needed[header]
+                msg_type, msg = decodeServerOUCH(data)
+                print("SERVER SAYS: ", msg)
             except KeyError:
                  raise ValueError('unknown header %s.' % header)
 
+            """
             if len(data) >= bytes_needed:
                 remainder = bytes_needed
                 self.buffer.extend(data[:remainder])
@@ -106,6 +110,7 @@ class Client(Protocol):
                 self.buffer.clear()
             if len(data):
                 self.dataReceived(data)
+            """
         
 # =====ClientFactory=========================
 
