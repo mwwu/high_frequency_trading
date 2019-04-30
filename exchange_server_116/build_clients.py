@@ -1,11 +1,11 @@
 """
 Client for simple Ouch Server
 """
-from client import main as poop
+from client import main as build
 #from maker_robot import Maker
 
 def main():
-    poop()
+    build()
 
 if __name__ == '__main__':
     main()
