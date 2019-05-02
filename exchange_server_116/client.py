@@ -80,8 +80,6 @@ class Client(Protocol):
         if self.inventory.inventory[share_name[0]] == 0:
             del self.inventory.inventory[share_name[0]]
 
-    def getProtocol():
-        return protocol
 
   
 #======Twisted connection methods=================
@@ -101,17 +99,8 @@ class Client(Protocol):
             except KeyError:
                  raise ValueError('unknown header %s.' % header)
 
-            """
-            if len(data) >= bytes_needed:
-                remainder = bytes_needed
-                self.buffer.extend(data[:remainder])
-                data = data[remainder:]
-                self.factory.maker.dataReceived(data)
-                self.buffer.clear()
-            if len(data):
-                self.dataReceived(data)
-            """
-        
+        print("About to build another message in Maker")
+        self.factory.maker.build_Message(b'S')
 # =====ClientFactory=========================
 
 class ClientConnectionFactory(ClientFactory):

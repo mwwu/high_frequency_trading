@@ -82,13 +82,13 @@ class Maker(Protocol):
 
 
   def new_ask(self):
-    print("\n MAKER_ROBOT: inside new_ask()\n")
+    # print("\n MAKER_ROBOT: inside new_ask()\n")
     ask_price = self.best_bid - S_CONST * aggressiveness
     self.ask_i = ask_price
     return ask_price
 
   def new_bid(self):
-    print("\n MAKER_ROBOT: inside new_bid()\n")
+    # print("\n MAKER_ROBOT: inside new_bid()\n")
     bid_price = self.best_offer - S_CONST * aggressiveness
     self.bid_i = bid_price
     return bid_price
@@ -130,7 +130,7 @@ class Maker(Protocol):
     return bo + S * sell_aggressiveness
 
   def dataReceived(self, data):
-    print("\n MAKER_ROBOT: inside dataReceived()\n")
+
     print("data received from server:", data.decode())
     #BB2x3BO5x6
     self.best_bid = 3

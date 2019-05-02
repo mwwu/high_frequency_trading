@@ -59,6 +59,7 @@ class Broker():
             traderID= self.orders[order_token]
             self.traders[traderID].transport.write(data)
 
+
     # TODO: What to do if there are NO best bids / best off???
     def broadcastBBBO(self, data):
         msg_type, msg = decodeServerOUCH(data)

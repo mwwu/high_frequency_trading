@@ -59,6 +59,7 @@ class TraderClient(Protocol):
 			print("SERVER SAYS: ", msg)
 
 
+
 # -----------------------
 # Main function
 # -----------------------
