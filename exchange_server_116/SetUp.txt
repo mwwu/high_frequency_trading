@@ -1,0 +1,20 @@
+Installation and Set Up Tutorial:
+(We assume python3 is installed)
+
+To Install
+  1. pip3 install Twisted - necessary for running the broker server
+  2. pip3 install numpy - necessary for analysis and for running external client
+
+Running the exchange:
+  1. python3 run_exchange_server.py --host 0.0.0.0 --port 9001 --debug --mechanism cda 
+
+Running the broker server
+  1. Open a new terminal window.
+  2. python3 test_broker.py
+
+Running the external client to make background noise
+  1. python3 external_client.py
+
+Running traders
+  1. Specify the kind of traders you want in build_clients.py 
+  2. python3 build_clients.py
