@@ -36,6 +36,7 @@ class Broker():
 
     # sends response from exchange back to intended trader
     def sendToTrader(self, data):
+        print("THE data in sendToTrader is:", data)
         msg_type, msg = decodeServerOUCH(data) 
 
         # order Accepted, add to broker's books
@@ -62,6 +63,7 @@ class Broker():
 
     # TODO: What to do if there are NO best bids / best off???
     def broadcastBBBO(self, data):
+        print("THE data in broadcastBBO is:", data)
         msg_type, msg = decodeServerOUCH(data)
 
         if msg_type == b'A':
@@ -123,12 +125,24 @@ class ExchangeClient(Protocol):
         reactor.callLater(1, self.broker.broadcastBBBO, data=data)
 
     def sendOrder(self, orderID, order):
+        print("inside exchange client sendOrder()\n")
         print(order)
-        msg_type, msg = decodeClientOUCH(order) 
-        if (msg_type == b'O'):
+        print("finished printing order\n")
+        if len(order) > 49:
+            print("we inside sendOrder line 130 ")
+            order_one = order[:49]
+            order_two = order[49:]
+            msg_type1, msg1 = decodeClientOUCH(order_one)
+            msg_type2, msg2 = decodeClientOUCH(order_two)
+            self.transport.write(bytes(msg1))
+            self.transport.write(bytes(msg2))
             order_token = '{:014d}'.format(orderID).encode('ascii')
-            msg['order_token'] = order_token
-        self.transport.write(bytes(msg))
+        else:
+            msg_type, msg = decodeClientOUCH(order)
+            if (msg_type == b'O'):
+                order_token = '{:014d}'.format(orderID).encode('ascii')
+                msg['order_token'] = order_token
+            self.transport.write(bytes(msg))
         return order_token
 
 

@@ -21,6 +21,7 @@
 # Send new message []
 #
 
+
 from __future__ import print_function
 
 from twisted.internet import task
@@ -49,6 +50,7 @@ from make_connection import gotProtocol
 from twisted.protocols.basic import LineReceiver
 
 import client
+import random
 
 aggressiveness = 0.5
 b_x = 0.5 #slider 
@@ -147,10 +149,10 @@ class Maker(Protocol):
     request = message_type (
       order_token='{:014d}'.format(1000).encode('ascii'), 
       buy_sell_indicator=Buy_or_Sell,
-      shares=10, 
+      shares=random.randint(1,100),
       stock=b'AMAZGOOG', 
-      price=5, 
-      time_in_force=10000, 
+      price=random.randint(1,100),
+      time_in_force=10000,
       firm=b'OUCH',
       display=b'N', 
       capacity=b'O', 

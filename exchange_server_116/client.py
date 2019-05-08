@@ -12,6 +12,8 @@ from collections import deque
 import maker_robot 
 #from maker_robot import Maker, main
 #from maker_robot import *
+import random
+
 
 class Client(Protocol):
     bytes_needed = {
@@ -31,6 +33,8 @@ class Client(Protocol):
         self.order_tokens = {}  # key = order token and value = 'B' or 'S'
         self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
         self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
+        self.counter = 0
+
 
     def get_cash(self):
         return self.inventory.cash
@@ -100,7 +104,22 @@ class Client(Protocol):
                  raise ValueError('unknown header %s.' % header)
 
         print("About to build another message in Maker")
-        self.factory.maker.build_Message(b'S')
+        # self.factory.maker.build_Message(b'S')
+        random_val = random.randint(0,2)
+        if self.counter < 30:
+            if random_val == 0:
+                self.counter += 1
+                self.factory.maker.build_Message(b'B')
+            else:
+                self.counter += 1
+                self.factory.maker.build_Message(b'S')
+        # if self.counter < 10:
+        #     self.counter += 1
+        #     self.factory.maker.build_Message(b'S')
+        # else:
+        #     print("This is the end of the connection!\n")
+        #     self.connectionLost()
+
 # =====ClientFactory=========================
 
 class ClientConnectionFactory(ClientFactory):
