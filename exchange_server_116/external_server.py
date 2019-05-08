@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from struct import *
 from message_handler import decodeServerOUCH, decodeClientOUCH
 import time
-
+import csv
 
 """
 ===== Underlying Value Class =====
@@ -136,9 +136,19 @@ class ExternalServerFactory(ServerFactory):
         self.underlyingValueFeed = UnderlyingValue(self.time, self.clients)
 
     def stopFactory(self):
+        with open('data_points.csv', mode='w') as data_file:
+            data_writer = csv.writer(data_file, delimiter='\n', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            data_writer.writerow(["ORDERS"])
+            data_writer.writerow(self.broker.priceAxis)
+            data_writer.writerow(["UNDERLYING VALUES"])
+            data_writer.writerow(self.underlyingValueFeed.valueAxis)
+
+        data_file.close()
+        print("Finished writing to data_points.csv!\n")
         self.broker.plotResults()
         self.underlyingValueFeed.plotResults()
         plt.show()
+
 
     def time(self):
         return time.time() - self.initialTime
@@ -147,7 +157,7 @@ def main():
     reactor.listenTCP(8000, ExternalServerFactory())
 
     # schedule the end of the experiment
-    reactor.callLater(30, reactor.stop)
+    reactor.callLater(10, reactor.stop)
 
     # start the event loop
     reactor.run()
