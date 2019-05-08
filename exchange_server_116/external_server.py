@@ -157,7 +157,7 @@ def main():
     reactor.listenTCP(8000, ExternalServerFactory())
 
     # schedule the end of the experiment
-    reactor.callLater(10, reactor.stop)
+    reactor.callLater(30, reactor.stop)
 
     # start the event loop
     reactor.run()
