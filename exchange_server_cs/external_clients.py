@@ -41,8 +41,6 @@ class RandomTrader():
 	def sendOrder(self, priceDelta, buyOrSell):
 		price = self.V + priceDelta
 
-		#self.client.transport.write(bytes(struct.pack('f', int(price * 100))))
-
 		order = OuchClientMessages.EnterOrder(
 			order_token='{:014d}'.format(0).encode('ascii'),
 			buy_sell_indicator=buyOrSell,
