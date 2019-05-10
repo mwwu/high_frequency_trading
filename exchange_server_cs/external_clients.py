@@ -47,7 +47,7 @@ class RandomTrader():
 			shares=1,
 			stock=b'AMAZGOOG',
 			price=int(price * 10000),
-			time_in_force=4,
+			time_in_force=2,
 			firm=b'OUCH',
 			display=b'N',
 			capacity=b'O',

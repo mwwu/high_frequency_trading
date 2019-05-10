@@ -69,7 +69,7 @@ class UnderlyingValue():
 
     # called after the factory ends
     def graph_results(self):
-        plt.hlines(self.valueAxis, self.timeAxis[:-1], self.timeAxis[1:], linewidth=3.3)
+        plt.hlines(self.valueAxis[1:], self.timeAxis[:-1], self.timeAxis[1:], linewidth=2)
 
         # dump to csv file
         with open('data_points.csv', mode='a') as data_file:

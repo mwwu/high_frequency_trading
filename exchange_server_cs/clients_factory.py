@@ -8,10 +8,17 @@ class Client(Protocol):
     def connectionMade(self):
         self.factory.broker.clients.append(self)
 
-    # if data received, plot it and then send to broker
+    # if data received, plot it and then send to exchange
+    # get_order_token, logs this order to this client
     def dataReceived(self, data):
-        self.factory.graph.plotOrder(data)
-        self.factory.broker.data_recieved_from_client(data)
+        msg_type, msg = decodeClientOUCH(data)
+        if msg_type == b'O':
+            self.factory.graph.plot_enter_order(msg)
+
+            client_id = self.factory.broker.clients.index(self)
+            order_token = self.factory.broker.get_order_token(client_id)
+            msg['order_token'] = order_token
+            self.factory.broker.exchange.transport.write(bytes(msg))
 
 
 # handles all data collection and graphing
@@ -27,21 +34,18 @@ class ClientsGrapher():
         self.sellEndTime = []
         self.sellPriceAxis = []
 
-    def plotOrder(self, data):
-        msg_type, msg = decodeClientOUCH(data)
-        if msg_type == b'O':
-            price = msg['price']
-            time_in_force = msg['time_in_force']
+    def plot_enter_order(self, msg):
+        price = msg['price']
+        time_in_force = msg['time_in_force']
+        if msg['buy_sell_indicator'] == b'B':
+            self.buyStartTime.append(self.time())
+            self.buyEndTime.append(self.time() + time_in_force)
+            self.buyPriceAxis.append(price/10000)
 
-            if msg['buy_sell_indicator'] == b'B':
-                self.buyStartTime.append(self.time())
-                self.buyEndTime.append(self.time() + time_in_force)
-                self.buyPriceAxis.append(price/10000)
-
-            elif msg['buy_sell_indicator'] == b'S':
-                self.sellStartTime.append(self.time())
-                self.sellEndTime.append(self.time() + time_in_force)
-                self.sellPriceAxis.append(price/10000)
+        elif msg['buy_sell_indicator'] == b'S':
+            self.sellStartTime.append(self.time())
+            self.sellEndTime.append(self.time() + time_in_force)
+            self.sellPriceAxis.append(price/10000)
 
     def graph_results(self):
         plt.hlines(self.buyPriceAxis, self.buyStartTime, self.buyEndTime, color ="red", linewidth=0.5)
@@ -68,4 +72,5 @@ class ClientsFactory(ServerFactory):
         # graph the results
         self.graph.graph_results()
         self.broker.underlyingValueFeed.graph_results()
+        plt.title("Robot Order Activity")
         plt.show()
