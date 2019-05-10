@@ -12,9 +12,11 @@ import csv
 """
 ===== Underlying Value Class =====
 
-This is the underlying V, that will control where the traders tend 
-to submit orders. When the state of the underlying value changes, 
+This is the underlying V, that will control where the traders tend
+to submit orders. When the state of the underlying value changes,
 all traders will be notified.
+
+Note: All underlying value broadcasts will start with: @
 
 ==================================
 """
@@ -59,7 +61,6 @@ class UnderlyingValue():
         for client in self.clients:
             m = pack('cf', b'@', self.V)
             client.transport.write(bytes(m))
-            #client.transport.write(bytes(msg.encode()))
 
     # implements the poisson process and normal distribution
     def generateNextJump(self):
@@ -69,13 +70,13 @@ class UnderlyingValue():
 
     # called after the factory ends
     def plotResults(self):
-        plt.hlines(self.valueAxis, self.timeAxis[:-1], self.timeAxis[1:])
+        plt.hlines(self.valueAxis, self.timeAxis[:-1], self.timeAxis[1:], linewidth=3.3)
 
 
 """
 ========== BBBO Class ==========
 
-This is the current state of BBBO. When the state of the BBBO changes 
+This is the current state of BBBO. When the state of the BBBO changes
 (everytime an order is executed, all traders will be notified.
 
 ================================
@@ -98,16 +99,36 @@ class Broker():
         self.clients = clients
 
         # initialize for data visualization of orders
-        self.timeAxis = []
-        self.priceAxis = []
+        self.buyStartTime = []
+        self.buyEndTime = []
+        self.buyPriceAxis = []
+
+        self.sellStartTime = []
+        self.sellEndTime = []
+        self.sellPriceAxis = []
 
     def orderReceived(self, data):
-        price = unpack('f', data)
-        self.timeAxis.append(self.time())
-        self.priceAxis.append(price)
+        msg_type, msg = decodeClientOUCH(data)
+        if msg_type == b'O':
+            price = msg['price']
+            time_in_force = msg['time_in_force']
+
+            if msg['buy_sell_indicator'] == b'B':
+                self.buyStartTime.append(self.time())
+                self.buyEndTime.append(self.time() + time_in_force)
+                self.buyPriceAxis.append(price/100)
+
+            elif msg['buy_sell_indicator'] == b'S':
+                self.sellStartTime.append(self.time())
+                self.sellEndTime.append(self.time() + time_in_force)
+                self.sellPriceAxis.append(price/100)
 
     def plotResults(self):
-        plt.scatter(self.timeAxis, self.priceAxis, .5)
+        plt.hlines(self.buyPriceAxis, self.buyStartTime, self.buyEndTime, color ="red", linewidth=0.5)
+        plt.hlines(self.sellPriceAxis, self.sellStartTime, self.sellEndTime, color ="blue", linewidth=0.5)
+
+        #plt.scatter(self.buyTimeAxis, self.buyPriceAxis, .5, color = "red")
+        #plt.scatter(self.sellTimeAxis, self.sellPriceAxis, .5, color = "blue")
 
 """
 ===== TWISTED Factory & Protocol =====
@@ -138,8 +159,10 @@ class ExternalServerFactory(ServerFactory):
     def stopFactory(self):
         with open('data_points.csv', mode='w') as data_file:
             data_writer = csv.writer(data_file, delimiter='\n', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            data_writer.writerow(["ORDERS"])
-            data_writer.writerow(self.broker.priceAxis)
+            data_writer.writerow(["ORDERS FOR BUYERS"])
+            data_writer.writerow(self.broker.buyPriceAxis)
+            data_writer.writerow(["ORDERS FOR SELLERS"])
+            data_writer.writerow(self.broker.sellPriceAxis)
             data_writer.writerow(["UNDERLYING VALUES"])
             data_writer.writerow(self.underlyingValueFeed.valueAxis)
 
