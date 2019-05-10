@@ -46,7 +46,7 @@ class RandomTrader():
 			buy_sell_indicator=buyOrSell,
 			shares=1,
 			stock=b'AMAZGOOG',
-			price=int(price * 100),
+			price=int(price * 10000),
 			time_in_force=4,
 			firm=b'OUCH',
 			display=b'N',
