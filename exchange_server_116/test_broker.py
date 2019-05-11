@@ -26,8 +26,6 @@ class Broker():
         'A': 66,
         'Q':33,
     }
-
-
     def __init__(self):
         self.traders = []
         self.orderID = 0
@@ -175,9 +173,7 @@ class ExchangeClient(Protocol):
         reactor.callLater(1, self.broker.broadcastBBBO, data=data)
 
     def sendOrder(self, orderID, order):
-        print("inside exchange client sendOrder()\n")
-        print(order)
-        print("finished printing order\n")
+        print("inside exchange client sendOrder() the order is: {}\n".format(order))
         if len(order) > 49:
             print("we inside sendOrder line 130 ")
             order_one = order[:49]

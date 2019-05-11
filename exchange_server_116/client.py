@@ -115,6 +115,7 @@ class Client(Protocol):
                 self.factory.maker.build_Message(b'S')
         else:
             print("\nFinished!!!\n")
+		    #https://jml.io/pages/how-to-disconnect-in-twisted-really.html look at this to close connection cleanly
 
 
 # =====ClientFactory=========================
