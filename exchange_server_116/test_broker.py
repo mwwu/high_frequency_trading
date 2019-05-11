@@ -17,10 +17,22 @@ incorrect/unintended misuse of asyncrounous function
 # note: only work with one stock right now
 # -----------------------
 class Broker():
+
+    bytes_needed = {
+        'S': 10,
+        'E': 40,
+        'C': 28,
+        'U': 80,
+        'A': 66,
+        'Q':33,
+    }
+
+
     def __init__(self):
         self.traders = []
         self.orderID = 0
         self.exchange = None
+
 
         #TODO: add more logic, ie remove when order is executed
         # orders[order_token] = traderID
@@ -36,8 +48,20 @@ class Broker():
 
     # sends response from exchange back to intended trader
     def sendToTrader(self, data):
-        print("THE data in sendToTrader is:", data)
-        msg_type, msg = decodeServerOUCH(data) 
+        print("The data in sendToTrader is:", data)
+        msg_type, msg = decodeServerOUCH(data)
+        header = chr(data[0])
+
+        # look for the number of bytes needed based on the header
+        try:
+            bytes_needed = self.bytes_needed[header]
+        except KeyError:
+            raise ValueError('unknown header %s.' %header)
+        # if there are extra bytes in the buffer then make data start at the next message
+        if len(data) >= bytes_needed:
+            remainder = bytes_needed
+            data = data[remainder:]
+
 
         # order Accepted, add to broker's books
         if msg_type == b'A':
@@ -61,10 +85,30 @@ class Broker():
             self.traders[traderID].transport.write(data)
 
 
+        #call function again cause there is remaining data in the buffer
+        if len(data):
+            self.sendToTrader(data)
+
+
+
+
+
     # TODO: What to do if there are NO best bids / best off???
     def broadcastBBBO(self, data):
-        print("THE data in broadcastBBO is:", data)
+        print("The data in broadcastBBO is:", data)
         msg_type, msg = decodeServerOUCH(data)
+
+        header = chr(data[0])
+
+        # look for the number of bytes needed based on the header
+        try:
+            bytes_needed = self.bytes_needed[header]
+        except KeyError:
+            raise ValueError('unknown header %s.' %header)
+        # if there are extra bytes in the buffer then make data start at the next message
+        if len(data) >= bytes_needed:
+            remainder = bytes_needed
+            data = data[remainder:]
 
         if msg_type == b'A':
             print('BIDS: ', self.bids)
@@ -78,6 +122,9 @@ class Broker():
                     bo, x, y = self.offers[0]
                 msg = "#BB" + str(bb) + ":BO" + str(bo)
                 t.transport.write(bytes(msg.encode()))
+        #call function again cause there is remaining data in the buffer
+        if len(data):
+            self.broadcastBBBO(data)
 
         #TODO calculate order imbalance here
 
@@ -116,8 +163,11 @@ class ExchangeClient(Protocol):
     def __init__(self, broker):
         self.broker = broker
 
+
+
     def connectionMade(self):
         self.broker.exchange = self
+
 
     # handles responses from exchange
     def dataReceived(self, data):

@@ -26,8 +26,7 @@ class Client(Protocol):
         'Q': 33,
     }
     def __init__(self, _algorithm = "None"):
-        super()        
-        self.buffer = deque()
+        super()
         self.algorithm = _algorithm 
         self.inventory = Inventory(0)
         self.order_tokens = {}  # key = order token and value = 'B' or 'S'
@@ -104,7 +103,8 @@ class Client(Protocol):
                  raise ValueError('unknown header %s.' % header)
 
         print("About to build another message in Maker")
-        # self.factory.maker.build_Message(b'S')
+
+        #creates 100 buy or sell orders randomly
         random_val = random.randint(0,2)
         if self.counter < 30:
             if random_val == 0:
@@ -113,12 +113,9 @@ class Client(Protocol):
             else:
                 self.counter += 1
                 self.factory.maker.build_Message(b'S')
-        # if self.counter < 10:
-        #     self.counter += 1
-        #     self.factory.maker.build_Message(b'S')
-        # else:
-        #     print("This is the end of the connection!\n")
-        #     self.connectionLost()
+        else:
+            print("\nFinished!!!\n")
+
 
 # =====ClientFactory=========================
 
