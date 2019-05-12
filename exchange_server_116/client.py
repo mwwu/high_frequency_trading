@@ -91,31 +91,55 @@ class Client(Protocol):
         self.factory.maker.begin_maker()
         #now we just need to build and send a message to the broker!
 
+    def connectionLost(self, reason):
+        print("Finished with client, Reason: {}\n".format(reason))
+        reactor.stop()
+
     def dataReceived(self, data):
-        header = chr(data[0]).encode('ascii')
+        header = chr(data[0])
         if (header == b'#'):
             print("BB/BO: ", data)
         else:
             try:
-                msg_type, msg = decodeServerOUCH(data)
-                print("SERVER SAYS: ", msg)
+                bytes_needed = self.bytes_needed[header]
             except KeyError:
                  raise ValueError('unknown header %s.' % header)
 
-        print("About to build another message in Maker")
+            if len(data) >= bytes_needed:
+                remainder = bytes_needed
+                more_data = data[remainder:]
+                data = data[:bytes_needed]
+
+            msg_type, msg = decodeServerOUCH(data)
+            print("SERVER SAYS: ", msg)
+            random_val = random.randint(0, 2)
+
+            if len(more_data):
+                self.dataReceived(more_data)
+            else:
+                if self.counter < 30:
+                    print("About to build another message in Maker")
+                    if random_val == 0:
+                        self.counter += 1
+                        self.factory.maker.build_Message(b'B')
+                    else:
+                        self.counter += 1
+                        self.factory.maker.build_Message(b'S')
+                else:
+                    print("finished with client!")
 
         #creates 100 buy or sell orders randomly
-        random_val = random.randint(0,2)
-        if self.counter < 30:
-            if random_val == 0:
-                self.counter += 1
-                self.factory.maker.build_Message(b'B')
-            else:
-                self.counter += 1
-                self.factory.maker.build_Message(b'S')
-        else:
-            print("\nFinished!!!\n")
-		    #https://jml.io/pages/how-to-disconnect-in-twisted-really.html look at this to close connection cleanly
+        # random_val = random.randint(0,2)
+        # if self.counter < 30:
+        #     print("About to build another message in Maker")
+        #     if random_val == 0:
+        #         self.counter += 1
+        #         self.factory.maker.build_Message(b'B')
+        #     else:
+        #         self.counter += 1
+        #         self.factory.maker.build_Message(b'S')
+        # else:
+        #     self.connectionLost("Done!")
 
 
 # =====ClientFactory=========================

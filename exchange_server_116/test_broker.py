@@ -3,14 +3,6 @@ from twisted.internet import reactor
 from random import randrange
 from message_handler import decodeServerOUCH, decodeClientOUCH
 
-"""
-
-note for kristian: a likely reason for the incorrect BB/BO, 
-is that the exchange server processes crosses in batch, and
-then sends out the executed messages in another batch.
-incorrect/unintended misuse of asyncrounous function
-
-"""
 
 # -----------------------
 # Broker class: manages all of the servers!
@@ -46,8 +38,7 @@ class Broker():
 
     # sends response from exchange back to intended trader
     def sendToTrader(self, data):
-        print("The data in sendToTrader is:", data)
-        msg_type, msg = decodeServerOUCH(data)
+        print("The data in sendToTrader is:{}".format(data))
         header = chr(data[0])
 
         # look for the number of bytes needed based on the header
@@ -55,11 +46,14 @@ class Broker():
             bytes_needed = self.bytes_needed[header]
         except KeyError:
             raise ValueError('unknown header %s.' %header)
+
         # if there are extra bytes in the buffer then make data start at the next message
         if len(data) >= bytes_needed:
             remainder = bytes_needed
-            data = data[remainder:]
+            more_data = data[remainder:]
+            data = data[:bytes_needed]
 
+        msg_type, msg = decodeServerOUCH(data)
 
         # order Accepted, add to broker's books
         if msg_type == b'A':
@@ -82,10 +76,9 @@ class Broker():
             traderID= self.orders[order_token]
             self.traders[traderID].transport.write(data)
 
-
         #call function again cause there is remaining data in the buffer
-        if len(data):
-            self.sendToTrader(data)
+        if len(more_data):
+            self.sendToTrader(more_data)
 
 
 
@@ -93,8 +86,9 @@ class Broker():
 
     # TODO: What to do if there are NO best bids / best off???
     def broadcastBBBO(self, data):
-        print("The data in broadcastBBO is:", data)
-        msg_type, msg = decodeServerOUCH(data)
+        print("The data in broadcastBBBO is:{}".format(data))
+
+
 
         header = chr(data[0])
 
@@ -103,10 +97,14 @@ class Broker():
             bytes_needed = self.bytes_needed[header]
         except KeyError:
             raise ValueError('unknown header %s.' %header)
+
         # if there are extra bytes in the buffer then make data start at the next message
         if len(data) >= bytes_needed:
             remainder = bytes_needed
-            data = data[remainder:]
+            more_data = data[remainder:]
+            data = data[:bytes_needed]
+
+        msg_type, msg = decodeServerOUCH(data)
 
         if msg_type == b'A':
             print('BIDS: ', self.bids)
@@ -120,9 +118,11 @@ class Broker():
                     bo, x, y = self.offers[0]
                 msg = "#BB" + str(bb) + ":BO" + str(bo)
                 t.transport.write(bytes(msg.encode()))
+
+
         #call function again cause there is remaining data in the buffer
-        if len(data):
-            self.broadcastBBBO(data)
+        if len(more_data):
+            self.broadcastBBBO(more_data)
 
         #TODO calculate order imbalance here
 
@@ -131,6 +131,17 @@ class Broker():
 # TraderServer class: handles the traders connecting to the broker
 # -----------------------
 class TraderServer(Protocol):
+
+    bytes_needed = {
+        'S': 10,
+        'E': 40,
+        'C': 28,
+        'U': 80,
+        'A': 66,
+        'Q': 33,
+        'O': 49
+    }
+
 
     def __init__(self, broker):
         self.broker = broker
@@ -145,12 +156,27 @@ class TraderServer(Protocol):
     def dataReceived(self, data):
         traderID = self.broker.traders.index(self)
         orderID = self.broker.orderID
+        header = chr(data[0])
+        more_data = None
+        try:
+            bytes_needed = self.bytes_needed[header]
+        except KeyError:
+            raise ValueError('unknown header %s.' %header)
+
+        if len(data) >= bytes_needed:
+            remainder = bytes_needed
+            more_data = data[remainder:]
+            data = data[:bytes_needed]
 
         order_token = self.broker.exchange.sendOrder(orderID, data)
         self.broker.orders[order_token] = traderID
 
         print("Order #" + str(orderID) + " sent.")
         self.broker.orderID += 1
+
+        if len(more_data):
+            print("about to recurse!")
+            self.dataReceived(more_data)
 
 
 # -----------------------
@@ -173,24 +199,14 @@ class ExchangeClient(Protocol):
         reactor.callLater(1, self.broker.broadcastBBBO, data=data)
 
     def sendOrder(self, orderID, order):
-        print("inside exchange client sendOrder() the order is: {}\n".format(order))
-        if len(order) > 49:
-            print("we inside sendOrder line 130 ")
-            order_one = order[:49]
-            order_two = order[49:]
-            msg_type1, msg1 = decodeClientOUCH(order_one)
-            msg_type2, msg2 = decodeClientOUCH(order_two)
-            self.transport.write(bytes(msg1))
-            self.transport.write(bytes(msg2))
-            order_token = '{:014d}'.format(orderID).encode('ascii')
-        else:
+        print("ORDER:{}\n".format(order))
+        if len(order):
             msg_type, msg = decodeClientOUCH(order)
-            if (msg_type == b'O'):
-                order_token = '{:014d}'.format(orderID).encode('ascii')
+            order_token = '{:014d}'.format(orderID).encode('ascii')
+            if msg_type == b'O':
                 msg['order_token'] = order_token
             self.transport.write(bytes(msg))
-        return order_token
-
+            return order_token
 
 # -----------------------
 # How everything is connected! :D
@@ -213,6 +229,7 @@ def main():
     traderServerFactory.protocol = traderServer
     reactor.listenTCP(8000, traderServerFactory)
     reactor.run()
+
 
 if __name__ == '__main__':
     main()
