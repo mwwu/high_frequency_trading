@@ -97,12 +97,15 @@ class Client(Protocol):
 
     def dataReceived(self, data):
         header = chr(data[0])
-        if (header == b'#'):
+        ascii_header = header.encode('ascii')
+        if (ascii_header == b'#'):
             print("BB/BO: ", data)
         else:
+            print("Key Error data: {}".format(data))
             try:
                 bytes_needed = self.bytes_needed[header]
             except KeyError:
+                 print("Key Error data: {}".format(data))
                  raise ValueError('unknown header %s.' % header)
 
             if len(data) >= bytes_needed:
