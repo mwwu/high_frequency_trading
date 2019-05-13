@@ -38,7 +38,7 @@ class Broker():
 
     # sends response from exchange back to intended trader
     def sendToTrader(self, data):
-        print("The data in sendToTrader is:{}".format(data))
+        # print("The data in sendToTrader is:{}".format(data))
         header = chr(data[0])
 
         # look for the number of bytes needed based on the header
@@ -78,7 +78,10 @@ class Broker():
 
         #call function again cause there is remaining data in the buffer
         if len(more_data):
+            self.broadcastBBBO(data)
             self.sendToTrader(more_data)
+        else:
+            self.broadcastBBBO(data)
 
 
 
@@ -86,23 +89,8 @@ class Broker():
 
     # TODO: What to do if there are NO best bids / best off???
     def broadcastBBBO(self, data):
-        print("The data in broadcastBBBO is:{}".format(data))
-
-
-
+        # print("The data in broadcastBBBO is:{}".format(data))
         header = chr(data[0])
-
-        # look for the number of bytes needed based on the header
-        try:
-            bytes_needed = self.bytes_needed[header]
-        except KeyError:
-            raise ValueError('unknown header %s.' %header)
-
-        # if there are extra bytes in the buffer then make data start at the next message
-        if len(data) >= bytes_needed:
-            remainder = bytes_needed
-            more_data = data[remainder:]
-            data = data[:bytes_needed]
 
         msg_type, msg = decodeServerOUCH(data)
 
@@ -117,12 +105,8 @@ class Broker():
                 if len(self.offers) > 0:
                     bo, x, y = self.offers[0]
                 msg = "#BB" + str(bb) + ":BO" + str(bo)
+                print("msg:{}\n".format(msg))
                 t.transport.write(bytes(msg.encode()))
-
-
-        #call function again cause there is remaining data in the buffer
-        if len(more_data):
-            self.broadcastBBBO(more_data)
 
         #TODO calculate order imbalance here
 
@@ -168,6 +152,7 @@ class TraderServer(Protocol):
             more_data = data[remainder:]
             data = data[:bytes_needed]
 
+        print("DATA in TraderServer: {}".format(data))
         order_token = self.broker.exchange.sendOrder(orderID, data)
         self.broker.orders[order_token] = traderID
 
@@ -175,7 +160,6 @@ class TraderServer(Protocol):
         self.broker.orderID += 1
 
         if len(more_data):
-            print("about to recurse!")
             self.dataReceived(more_data)
 
 
@@ -187,8 +171,6 @@ class ExchangeClient(Protocol):
     def __init__(self, broker):
         self.broker = broker
 
-
-
     def connectionMade(self):
         self.broker.exchange = self
 
@@ -196,7 +178,8 @@ class ExchangeClient(Protocol):
     # handles responses from exchange
     def dataReceived(self, data):
         reactor.callLater(0, self.broker.sendToTrader, data=data)
-        reactor.callLater(1, self.broker.broadcastBBBO, data=data)
+        #not the best way to do this but i made sendToTrader call broadcastBBO after sendtotrader is done
+        # reactor.callLater(1, self.broker.broadcastBBBO, data=data)
 
     def sendOrder(self, orderID, order):
         print("ORDER:{}\n".format(order))

@@ -98,10 +98,18 @@ class Client(Protocol):
     def dataReceived(self, data):
         header = chr(data[0])
         ascii_header = header.encode('ascii')
+        random_val = random.randint(0, 2)
         if (ascii_header == b'#'):
             print("BB/BO: ", data)
+            if self.counter < 30:
+                print("\nAbout to build another message in Maker")
+                if random_val == 0:
+                    self.counter += 1
+                    self.factory.maker.build_Message(b'B')
+                else:
+                    self.counter += 1
+                    self.factory.maker.build_Message(b'S')
         else:
-            print("Key Error data: {}".format(data))
             try:
                 bytes_needed = self.bytes_needed[header]
             except KeyError:
@@ -115,34 +123,18 @@ class Client(Protocol):
 
             msg_type, msg = decodeServerOUCH(data)
             print("SERVER SAYS: ", msg)
-            random_val = random.randint(0, 2)
 
             if len(more_data):
                 self.dataReceived(more_data)
             else:
                 if self.counter < 30:
-                    print("About to build another message in Maker")
+                    print("\nAbout to build another message in Maker")
                     if random_val == 0:
                         self.counter += 1
                         self.factory.maker.build_Message(b'B')
                     else:
                         self.counter += 1
                         self.factory.maker.build_Message(b'S')
-                else:
-                    print("finished with client!")
-
-        #creates 100 buy or sell orders randomly
-        # random_val = random.randint(0,2)
-        # if self.counter < 30:
-        #     print("About to build another message in Maker")
-        #     if random_val == 0:
-        #         self.counter += 1
-        #         self.factory.maker.build_Message(b'B')
-        #     else:
-        #         self.counter += 1
-        #         self.factory.maker.build_Message(b'S')
-        # else:
-        #     self.connectionLost("Done!")
 
 
 # =====ClientFactory=========================
