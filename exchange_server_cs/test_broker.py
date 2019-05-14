@@ -78,7 +78,6 @@ class Broker():
 
         #call function again cause there is remaining data in the buffer
         if len(more_data):
-            self.broadcastBBBO(data)
             self.sendToTrader(more_data)
         else:
             self.broadcastBBBO(data)
@@ -91,9 +90,7 @@ class Broker():
     def broadcastBBBO(self, data):
         # print("The data in broadcastBBBO is:{}".format(data))
         header = chr(data[0])
-
         msg_type, msg = decodeServerOUCH(data)
-
         if msg_type == b'A':
             print('BIDS: ', self.bids)
             print('OFFS: ', self.offers)
@@ -152,7 +149,6 @@ class TraderServer(Protocol):
             more_data = data[remainder:]
             data = data[:bytes_needed]
 
-        print("DATA in TraderServer: {}".format(data))
         order_token = self.broker.exchange.sendOrder(orderID, data)
         self.broker.orders[order_token] = traderID
 
