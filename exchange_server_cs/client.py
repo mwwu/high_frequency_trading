@@ -48,11 +48,11 @@ class Client(Protocol):
             if (add_or_withdraw == 'A'):
                 add = input("How much money do you want to add? ")
                 self.inventory.cash += int(add)
-                break;
+                break
             elif (add_or_withdraw == 'B'):
                 sub = input("How much money do you want to withdraw? ")
                 self.inventory.cash -= int(sub)
-                break;
+                break
             else:
                 print("Please try again.")
 
