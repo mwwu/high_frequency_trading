@@ -70,7 +70,8 @@ class ClientsFactory(ServerFactory):
 
     def stopFactory(self):
         # graph the results
+        self.broker.end_time = self.broker.time()
         self.graph.graph_results()
-        self.broker.underlyingValueFeed.graph_results()
+        self.broker.underlyingValueFeed.graph_results(self.broker.end_time)
         plt.title("Robot Order Activity")
         plt.show()

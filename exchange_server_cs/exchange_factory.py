@@ -3,6 +3,7 @@ from message_handler import decodeServerOUCH
 import matplotlib.pyplot as plt
 import time
 from collections import OrderedDict 
+import numpy as np
 
 
 class Exchange(Protocol):
@@ -14,20 +15,24 @@ class Exchange(Protocol):
 		try:
 			msg_type, msg = decodeServerOUCH(data) 
 			if msg_type == b'A':
+				#print('accepted: ', msg)
 				self.factory.graph.plot_accepted_order(msg)
-				#hello = 0
 
 			elif msg_type == b'E':
 				#print('executed: ', msg)
 				self.factory.graph.plot_executed_order(msg)
 
+			# currently ignores cancelled, because these are 
+			# just orders that ran out of time and no one matched
+			elif msg_type == b'C':
+				#print('cancelled: ', msg)
+				#self.factory.graph.plot_cancelled_order(msg)
+				hello = 0
+
 			elif msg_type == b'Q':
 				#print('BBBO: ', msg)
 				self.factory.graph.plot_bbbo(msg)
-
-			elif msg_type == b'C':
-				#canceled
-				hello = 0
+			
 			else:
 				print('?: ', msg_type)
 		except:
@@ -50,14 +55,17 @@ class ExchangeGrapher():
 		self.crossTime = []
 		self.crossPrice = []
 
-		self.bbPrice = []
-		self.boPrice = []
-		self.bboTime = []
+		# data for BBBO [timestamp] = price
+		self.bbData = {}
+		self.boData = {}
+		self.bbData[-1] = -1
+		self.boData[-1] = -1
 
+	# creates a horizontal line to represent the orer in the book
 	def plot_accepted_order(self, msg):
 		price = msg['price']/10000
-		time_in_force = msg['time_in_force']*1000000
-		timestamp = msg['timestamp']/1000
+		time_in_force = msg['time_in_force']/10
+		timestamp = msg['timestamp']/10000000000
 		order_token = msg['order_token']
 
 		if msg['buy_sell_indicator'] == b'B':
@@ -70,9 +78,10 @@ class ExchangeGrapher():
 			self.sellEndTime[order_token] = timestamp + time_in_force
 			self.sellPriceAxis.append(price)
 
+	# cuts the horizontal line short, and puts cross to represent cross in book
 	def plot_executed_order(self, msg):
 		price = msg['execution_price']/10000
-		timestamp = msg['timestamp']/1000
+		timestamp = msg['timestamp']/10000000000
 		order_token = msg['order_token']
 
 		self.crossPrice.append(price)
@@ -82,17 +91,32 @@ class ExchangeGrapher():
 		if order_token in self.sellEndTime:
 			self.sellEndTime[order_token] = timestamp
 
-	def plot_bbbo(self, msg):
+	# cuts the horizontal line short, to represent cancellation
+	def plot_cancelled_order(self, msg):
+		timestamp = msg['timestamp']/10000000000
+		order_token = msg['order_token']
 
-		timestamp = msg['timestamp']/1000
+		if order_token in self.buyEndTime:
+			self.buyEndTime[order_token] = timestamp
+		if order_token in self.sellEndTime:
+			self.sellEndTime[order_token] = timestamp
+
+
+	# datapoints are added twice to make graphing easier
+	def plot_bbbo(self, msg):
+		timestamp = msg['timestamp']/10000000000
 		bid_price = msg['best_bid']/10000
 		ask_price = msg['best_ask']/10000
 
-		if (ask_price < 200000 and bid_price != 0):
-			self.bbPrice.append(bid_price)
-			self.boPrice.append(ask_price)
-			self.bboTime.append(timestamp)
+		if (bid_price != 0):
+			self.bbData[timestamp] = bid_price
+		else:
+			self.bbData[timestamp] = np.nan
 
+		if (ask_price < 200000):
+			self.boData[timestamp] = ask_price
+		else:
+			self.boData[timestamp] = np.nan
 
 	def graph_results(self):
 		plt.hlines(self.buyPriceAxis, self.buyStartTime, self.buyEndTime.values(), color ="red", linewidth=0.5)
@@ -101,11 +125,18 @@ class ExchangeGrapher():
 		plt.scatter(self.crossTime, self.crossPrice, s=7, linewidth=1, marker = "x")
 
 	def graph_results_bbo(self):
-		plt.hlines(self.bbPrice[1:], self.bboTime[:-1], self.bboTime[1:], linewidth=1.5, color="red")
-		plt.hlines(self.boPrice[1:], self.bboTime[:-1], self.bboTime[1:], linewidth=1.5, color="blue")
+		# list manipulation to make the graphical points
+		bb = sorted(self.bbData.items())
+		bbTime = [key for (key, value) in bb for i in range(2)]
+		bbPrice = [value for (key, value) in bb for i in range(2)]
 
+		bo = sorted(self.boData.items())
+		boTime = [key for (key, value) in bo for i in range(2)]
+		boPrice = [value for (key, value) in bo for i in range(2)]
 
-		
+		plt.plot(bbTime[3:-1], bbPrice[2:-2], linewidth=.7, color="red")
+		plt.plot(boTime[3:-1], boPrice[2:-2], linewidth=.7, color="blue")
+
 	def time(self, time):
 		return time - self.initial_time
 
