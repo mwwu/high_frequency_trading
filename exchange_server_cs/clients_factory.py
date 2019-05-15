@@ -7,15 +7,6 @@ class Client(Protocol):
     # if a connection is made, add self to the broker
     def connectionMade(self):
         self.factory.broker.clients.append(self)
-<<<<<<< HEAD
-   
-    # if data received, plot it and then send to broker
-    def dataReceived(self, data):
-        self.factory.graph.plotOrder(data)
-        self.factory.broker.data_recieved_from_client(data)
-   
-   
-=======
 
     # if data received, plot it and then send to exchange
     # get_order_token, logs this order to this client
@@ -30,7 +21,6 @@ class Client(Protocol):
             self.factory.broker.exchange.transport.write(bytes(msg))
 
 
->>>>>>> 27e70ebdd553e3fc141d3738691c2c91fcc9f006
 # handles all data collection and graphing
 class ClientsGrapher():
     def __init__(self, time):
