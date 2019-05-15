@@ -35,6 +35,8 @@ class UnderlyingValue():
         # initialize graph for data visualization
         self.timeAxis = []
         self.valueAxis = []
+        self.timeAxis.append(0)
+        self.valueAxis.append(V)
 
         self.broadcast()
 
@@ -46,9 +48,10 @@ class UnderlyingValue():
     def jump(self, waitingTime, jumpHeight):
         self.V += jumpHeight
         self.broadcast()
+        time = self.time()
 
         # store values for data visualization
-        self.timeAxis.append(self.time())
+        self.timeAxis.append(time)
         self.valueAxis.append(self.V)
 
         waitingTime, jumpHeight = self.generateNextJump()
@@ -68,8 +71,10 @@ class UnderlyingValue():
         return (waitingTime, jumpHeight)
 
     # called after the factory ends
-    def graph_results(self):
-        plt.hlines(self.valueAxis, self.timeAxis[:-1], self.timeAxis[1:], linewidth=3.3)
+    def graph_results(self, end_time):
+        self.timeAxis.append(end_time)
+        plt.hlines(self.valueAxis, self.timeAxis[:-1], self.timeAxis[1:], linewidth=1)
+        plt.vlines(self.timeAxis[1:-1], self.valueAxis, self.valueAxis[1:], linewidth=1)
 
         # dump to csv file
         with open('data_points.csv', mode='a') as data_file:

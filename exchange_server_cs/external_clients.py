@@ -14,7 +14,7 @@ if we want $100.30, this is represented as 10030
 """
 
 class RandomTrader():
-	def __init__(self, client, V = 100, lmbda=100, mean=0, std=.4):
+	def __init__(self, client, V = 100, lmbda=50, mean=0, std=0.2):
 		self.client = client
 
 		self.V = V
@@ -25,7 +25,7 @@ class RandomTrader():
 		waitingTime, priceDelta, buyOrSell = self.generateNextOrder()
 		reactor.callLater(waitingTime, self.sendOrder, priceDelta, buyOrSell)
 
-	def underlyingValueFeed(self, V):
+	def set_underlying_value(self, V):
 		self.V = V
 
 	def generateNextOrder(self):
@@ -60,7 +60,6 @@ class RandomTrader():
 		waitingTime, priceDelta, buyOrSell = self.generateNextOrder()
 		reactor.callLater(waitingTime, self.sendOrder, priceDelta, buyOrSell)
 
-
 class ExternalClient(Protocol):
 	def __init__(self):
 		self.trader = RandomTrader(self)
@@ -73,7 +72,7 @@ class ExternalClient(Protocol):
 		ch = chr(data[0]).encode('ascii')
 		if (ch == b'@'):
 			c, V = struct.unpack('cf', data)
-			self.trader.underlyingValueFeed(V)
+			self.trader.set_underlying_value(V)
 		else:
 			print("unhandled message type")
 
