@@ -133,17 +133,14 @@ class Maker(Protocol):
 
   def dataReceived(self, data):
 
-    print("data received from server:", data.decode())
+    print("\nDATA RECIEVED INSIDE MAKER_ROBOT\n:", data.decode())
     #BB2x3BO5x6
     self.best_bid = 3
     self.best_offer = 4
     
 
-  def build_Message(self, Buy_or_Sell):
-    if(Buy_or_Sell == 'S'):
-      Price = self.new_ask() 
-    else:
-      Price = self.new_bid()
+  def build_Message(self):
+    
     #parameters: buy/sell and price
     message_type = OuchClientMessages.EnterOrder
     request = message_type (

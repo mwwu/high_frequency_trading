@@ -84,6 +84,7 @@ class MakerTraderClient(Protocol):
 
 
 	def dataReceived(self, data):
+    print("DATA INSIDE MAKER TRADERS ... \n",data)
 		ch = chr(data[0]).encode('ascii')
 		if (ch == b'#'):
 			print("BB/BO: ", data)

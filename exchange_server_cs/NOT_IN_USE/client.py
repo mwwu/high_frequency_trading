@@ -97,18 +97,27 @@ class Client(Protocol):
 
     def dataReceived(self, data):
         header = chr(data[0])
+        print("\n----------------------- \n")
+        print("\n*****DATA****: \n", data)
+        print("\n----------------------- \n")
         ascii_header = header.encode('ascii')
         random_val = random.randint(0, 2)
         if (ascii_header == b'#'):
             print("BB/BO: ", data)
+            for(i in data):
+              if(i == 'B' && bb != False):
+                bb = True
+              if
             if self.counter < 30:
                 print("\nAbout to build another message in Maker")
-                if random_val == 0:
-                    self.counter += 1
-                    self.factory.maker.build_Message(b'B')
-                else:
-                    self.counter += 1
-                    self.factory.maker.build_Message(b'S')
+                self.factory.maker.build_Message(data)
+                self.counter +=1 
+                #if random_val == 0:
+                    #self.counter += 1
+                    #self.factory.maker.build_Message(b'B')
+                #else:
+                #    self.counter += 1
+                #    self.factory.maker.build_Message(b'S')
         else:
             try:
                 bytes_needed = self.bytes_needed[header]
