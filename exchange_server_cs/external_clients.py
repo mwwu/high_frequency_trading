@@ -6,23 +6,27 @@ import struct
 import numpy as np
 import random as rand
 import math
+
+#Traders
 import RandomTrader
+import MakerTrader
 
 class ExternalClient(Protocol):
-	def __init__(self):
-		self.trader = RandomTrader.RandomTrader(self)
+  def __init__(self):
+    self.trader = MakerTrader.MakerTrader(self)
+    #self.trader = RandomTrader.RandomTrader(self)
 
-	def connectionMade(self):
-		print("client connected")
+  def connectionMade(self):
+    print("client connected")
 
-	def dataReceived(self, data):
-		# forward data to the trader, so they can handle it in different ways
-		ch = chr(data[0]).encode('ascii')
-		if (ch == b'@'):
-			c, V = struct.unpack('cf', data)
-			self.trader.set_underlying_value(V)
-		else:
-			print("unhandled message type")
+  def dataReceived(self, data):
+    # forward data to the trader, so they can handle it in different ways
+    ch = chr(data[0]).encode('ascii')
+    if (ch == b'@'):
+      c, V = struct.unpack('cf', data)
+      self.trader.set_underlying_value(V)
+    else:
+      print("unhandled message type")
 
 # -----------------------
 # Main function
