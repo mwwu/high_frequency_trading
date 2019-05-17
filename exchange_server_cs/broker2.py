@@ -5,11 +5,6 @@ from clients_factory import ClientsFactory
 from exchange_factory import ExchangeFactory
 from underlying_value import UnderlyingValue
 
-#configure broker
-isMultipleMarkets = True
-Market1Port = 9001
-Market2Port = 9002
-
 
 """
 Broker Class:
@@ -40,15 +35,13 @@ class Broker():
 		return order_token
 
 def main():
-  broker = Broker()
-  reactor.listenTCP(8000, ClientsFactory(broker))
-  reactor.connectTCP("localhost", Market1Port, ExchangeFactory(broker))
-  if(isMultipleMarkets):
-    reactor.listenTCP(8001, ClientsFactory(broker))
-	  reactor.connectTCP("localhost", Market2Port, ExchangeFactory(broker))
+	broker = Broker()
 
-  reactor.callLater(120, reactor.stop)
-  reactor.run()
+	reactor.listenTCP(8001, ClientsFactory(broker))
+	reactor.connectTCP("localhost", 9002, ExchangeFactory(broker))
+
+	reactor.callLater(120, reactor.stop)
+	reactor.run()
 
 if __name__ == '__main__':
 	main()

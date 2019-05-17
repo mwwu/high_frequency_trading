@@ -11,6 +11,7 @@ class Client(Protocol):
     # if data received, plot it and then send to exchange
     # get_order_token, logs this order to this client
     def dataReceived(self, data):
+        print("\nDATA_RECIEVED IN CLIENT_FACTORY: \n", data)
         msg_type, msg = decodeClientOUCH(data)
         if msg_type == b'O':
             self.factory.graph.plot_enter_order(msg)

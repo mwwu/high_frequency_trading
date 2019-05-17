@@ -35,7 +35,7 @@ class ExternalClient(Protocol):
 def main():
     externalClientFactory = ClientFactory()
     externalClientFactory.protocol = ExternalClient
-    reactor.connectTCP("localhost", 8000, externalClientFactory)
+    reactor.connectTCP("localhost", 8001, externalClientFactory)
     reactor.run()
 
 if __name__ == '__main__':
