@@ -42,7 +42,7 @@ class EpsilonTrader():
     order = OuchClientMessages.EnterOrder(
       order_token='{:014d}'.format(0).encode('ascii'),
       buy_sell_indicator=buyOrSell,
-      shares=1,
+      shares=5,
       stock=b'AMAZGOOG',
       price=int(price * 10000),
       time_in_force=4,
