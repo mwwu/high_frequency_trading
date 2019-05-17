@@ -7,7 +7,7 @@ import numpy as np
 import random as rand
 import math
 
-class RandomTrader():
+class EpsilonTrader():
 
   def __init__(self, client, V = 100, lmbda=50, mean=0, std=0.2):
     self.client = client
@@ -17,25 +17,27 @@ class RandomTrader():
     self.mean = mean
     self.std = std
 
-    waitingTime, priceDelta, buyOrSell = self.generateNextOrder()
-    reactor.callLater(waitingTime, self.sendOrder, priceDelta, buyOrSell)
+    waitingTime, priceEpsilon, buyOrSell = self.generateNextOrder()
+    reactor.callLater(waitingTime, self.sendOrder, priceEpsilon, buyOrSell)
 
   def set_underlying_value(self, V): 
     self.V = V 
 
   def generateNextOrder(self):
     waitingTime = -(1/self.lmbda)*math.log(rand.random()/self.lmbda)
-    priceDelta = np.random.normal(self.mean, self.std)
-    print("PRICE_DELTA: ", priceDelta)
+    priceEpsilon = 0.01
     randomSeed = rand.random()
     if (randomSeed > .5):
       buyOrSell = b'B'
     else:
       buyOrSell = b'S'
-    return waitingTime, priceDelta, buyOrSell
+    return waitingTime, priceEpsilon, buyOrSell
 
-  def sendOrder(self, priceDelta, buyOrSell):
-    price = self.V + priceDelta
+  def sendOrder(self, priceEpsilon, buyOrSell):
+    if(buyOrSell == b'S'):
+      price = self.V + priceEpsilon
+    if(buyOrSell == b'B'):
+      price = self.V - priceEpsilon
 
     order = OuchClientMessages.EnterOrder(
       order_token='{:014d}'.format(0).encode('ascii'),
@@ -53,6 +55,6 @@ class RandomTrader():
       customer_type=b' ')
     self.client.transport.write(bytes(order))
 
-    waitingTime, priceDelta, buyOrSell = self.generateNextOrder()
-    reactor.callLater(waitingTime, self.sendOrder, priceDelta, buyOrSell)
+    waitingTime, priceEpsilon, buyOrSell = self.generateNextOrder()
+    reactor.callLater(waitingTime, self.sendOrder, priceEpsilon, buyOrSell)
 

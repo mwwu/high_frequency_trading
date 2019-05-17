@@ -10,14 +10,12 @@ import math
 #Traders
 import RandomTrader
 import MakerTrader
-import EpsilonTrader
 
 class ExternalClient(Protocol):
   def __init__(self):
     #specify trader
     #self.trader = MakerTrader.MakerTrader(self)
-    #self.trader = RandomTrader.RandomTrader(self)
-    self.trader = EpsilonTrader.EpsilonTrader(self)
+    self.trader = RandomTrader.RandomTrader(self)
 
   def connectionMade(self):
     print("client connected")
@@ -37,8 +35,7 @@ class ExternalClient(Protocol):
 def main():
     externalClientFactory = ClientFactory()
     externalClientFactory.protocol = ExternalClient
-    reactor.connectTCP("localhost", 8000, externalClientFactory)
-    reactor.callLater(120, reactor.stop)
+    reactor.connectTCP("localhost", 8002, externalClientFactory)
     reactor.run()
 
 if __name__ == '__main__':
