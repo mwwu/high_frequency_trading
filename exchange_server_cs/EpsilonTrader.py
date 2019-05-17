@@ -7,7 +7,7 @@ import numpy as np
 import random as rand
 import math
 
-class RandomTrader():
+class EpsilonTrader():
 
   def __init__(self, client, V = 100, lmbda=50, mean=0, std=0.2):
     self.client = client
@@ -25,8 +25,7 @@ class RandomTrader():
 
   def generateNextOrder(self):
     waitingTime = -(1/self.lmbda)*math.log(rand.random()/self.lmbda)
-    priceDelta = np.random.normal(self.mean, self.std)
-    print("PRICE_DELTA: ", priceDelta)
+    priceEpsilon = np.random.normal(self.mean, self.std)
     randomSeed = rand.random()
     if (randomSeed > .5):
       buyOrSell = b'B'
@@ -35,7 +34,10 @@ class RandomTrader():
     return waitingTime, priceDelta, buyOrSell
 
   def sendOrder(self, priceDelta, buyOrSell):
-    price = self.V + priceDelta
+    if(buyOrSell == b'S'):
+      price = self.V + priceDelta
+    if(buyOrSell == b'B'):
+      price = self.V - priceDelta
 
     order = OuchClientMessages.EnterOrder(
       order_token='{:014d}'.format(0).encode('ascii'),

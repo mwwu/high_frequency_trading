@@ -10,12 +10,14 @@ import math
 #Traders
 import RandomTrader
 import MakerTrader
+import EpsilonTrader
 
 class ExternalClient(Protocol):
   def __init__(self):
     #specify trader
     #self.trader = MakerTrader.MakerTrader(self)
-    self.trader = RandomTrader.RandomTrader(self)
+    #self.trader = RandomTrader.RandomTrader(self)
+    self.trader = EpsilonTrader.EpsilonTrader(self)
 
   def connectionMade(self):
     print("client connected")
