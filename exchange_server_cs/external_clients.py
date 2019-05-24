@@ -6,6 +6,7 @@ import struct
 import numpy as np
 import random as rand
 import math
+import time
 
 #Traders
 import RandomTrader
@@ -24,6 +25,7 @@ class ExternalClient(Protocol):
 
   def dataReceived(self, data):
     # forward data to the trader, so they can handle it in different ways
+    time.sleep(0.3)
     ch = chr(data[0]).encode('ascii')
     if (ch == b'@'):
       c, V = struct.unpack('cf', data)
