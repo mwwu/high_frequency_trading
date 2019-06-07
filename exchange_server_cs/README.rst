@@ -1,54 +1,5 @@
 Note: Using python 3.7
 
-Dependencies:
-
-::
-
-    pip3 install -r requirements.txt
-
-To run a CDA instance:
-
-::
-
-    python3 run_exchange_server.py --host 0.0.0.0 --port 9001 --debug --mechanism cda
-    
-To run a FBA instance with batch length of 3 seconds:
-
-::
-
-    python3 run_exchange_server.py --host 0.0.0.0 --port 9101 --debug --mechanism fba --interval 3
-
-
-...............
-
-1. run the exchange server
-::
-
-        $: python3 run_exchange_server.py --host 0.0.0.0 --port 9001 --debug --mechanism cda
-
-2. run the broker
-::
-
-	$: python3 broker.py
-	
-3. Specify what trader to use in external_clients.py
-::
-
-	open external_clients.py 
-	Under the "Specify Trader" comment on line 16:
-	either write ' self.trader = RandomTrader.RandomTrader(self) '
-	or '  self.trader = MakerTrader.MakerTrader(self) '
-	without the single quotes.
-
-
-4. run the traders (can run multiple at same time)
-::
-	$: python3 external_clients.py 
-	
-
-What it does: As soon as a trader is connected, it will send an Order to the Broker, which forwards it to the Exchange. The Exchange will then send a response to the Broker. TODO: the message is a wierd bytes/hex/ascii thing that I cant decode yet
-
-
 
 =====
 Intro
@@ -61,7 +12,7 @@ Getting Started
 
 Step 0
 ***********
-In order to run the system, you will first need to install the requirements. Open bash / terminal and type:
+In order to run the system, you will first need to install the dependencies. Open bash / terminal and type:
 ::
 	pip3 install -r requirements.txt
 
@@ -158,6 +109,7 @@ Python: Twisted
 Component 1: Exchange
 ===============
 The Exchange handles the "book" of buy and sell orders. For our experiments, we will only be dealing with one stock. Let's go through a simple example of how an Exchange would handle orders.
+
 1. Someone wants to buy AMAZGOOG for $10
 2. The Exchange checks its Book to see if anyone is offering AMAZGOOG for $10 or less
 3. If YES, the Exchange makes a "cross". It will match these two orders, and AMAZGOOG will be sold at that price.
@@ -174,14 +126,15 @@ We currently have only built a limited number of different traders (RandomTrader
 Component 3: Broker
 ===============
 The Broker acts as a router between the Trader and Exchange. Let's go through an example, to see how the Broker routes these orders.
-1. A Trader wants to buy AMAZGOOG for 10$
-2. The Trader sends the order to the Broker
-3. The Broker saves the TraderID, and forwards the order to the Exchange
-4. The Exchange will Accept the order, and send a confirmation message back to the Broker
-5. The Broker then returns this confirmation message back to the Trader
-6. Eventually, when a cross occurs, the Exchange will send an executed message to the Broker
-7. The Broker will forward this executed message the the Trader
-8. The Trader can update it's inventory or algorithm
+
+#. A Trader wants to buy AMAZGOOG for 10$
+#. The Trader sends the order to the Broker
+#. The Broker saves the TraderID, and forwards the order to the Exchange
+#. The Exchange will Accept the order, and send a confirmation message back to the Broker
+#. The Broker then returns this confirmation message back to the Trader
+#. Eventually, when a cross occurs, the Exchange will send an executed message to the Broker
+#. The Broker will forward this executed message the the Trader
+#. The Trader can update it's inventory or algorithm
 
 The obvious question is now, what is the point of the Broker? At this point, the Trader could directly send orders to the Exchange. The Broker becomes essential when we introduce Feeds. Let's take the Underlying Value Feed as an example. The underlying value represents some fundamental value of a stock. When we generate an underlying value, we want all of the Random Traders to change the price of their orders. The Broker provides a centralized location to manage all of the Traders.
 
