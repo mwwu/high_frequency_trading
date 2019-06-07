@@ -35,7 +35,7 @@ In order to keep track of all of the communications between the traders and the 
 
 (Optional) Open a new terminal window, and start the Broker:
 ::
-	python3 broker.py
+	python3 broker.py --port 9001 --client 8000
 
 
 Step 3
