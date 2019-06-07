@@ -127,35 +127,67 @@ Stock Market: High Frequency Trading
 Stock Market: Types of Markets
 ************************************
 - Background Reading: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3154070
+- Background Reading: http://www.nasdaqtrader.com/content/technicalsupport/specifications/tradingproducts/ouch4.2.pdf
 - What is a CDA, and how does it handle orders?
 - What is an FBA, and how does it handle orders?
-- Which one is hypothesized to help, 
+- Why do we think an FBA will help combat HFT?
+- Draw a price over time graph of what a CDA and FBA market would look like with one stock.
 
+Python Basics
+*****************
+- What is class inheritance and how does it work?
+- How does async programming work?
 
+Python: Server/Client Programming
+*************************************
+- What is TCP?
+- What is a port?
+- What are servers vs clients?
 
-TODO ----------------
+Python: Twisted
+****************************
+- Background Reading: https://twistedmatrix.com/trac/
+- What is Twisted built for?
+- What is a Factory and what is its purpose?
+- What is a Protocol and what is its purpose?
+- What is a reactor and the event loop?
+- How does Twisted handle a live TCP connection and how can you use it to send messages?
 
-- Basic understanding of how the stock market works (Read the Stock Market section below, ask the Prof, 
-- how the stock market book works
-- python
-- twisted
-- how servers and ports work
 
 ===============
-Exchange
+Component 1: Exchange
 ===============
-- the broker consists of feeds
-- what is underlying value
+The Exchange handles the "book" of buy and sell orders. For our experiments, we will only be dealing with one stock. Let's go through a simple example of how an Exchange would handle orders.
+1. Someone wants to buy AMAZGOOG for $10
+2. The Exchange checks its Book to see if anyone is offering AMAZGOOG for $10 or less
+3. If YES, the Exchange makes a "cross". It will match these two orders, and AMAZGOOG will be sold at that price.
+4. If NO, the Exchange saves the buy order in its Book. Then, Exchange will wait for someone to offer AMAZGOOG for $10 or less and make a cross at that time.
+
+At this point in our experiments, we deal with two types of Exchanges (CDA and FBA). The fundamental ways of handling the orders are the same. But, with Continuous Double Auction, the orders are taken in the order they came. In contrast, with Frequent Batch Auction, the orders are taken in batches of, for example, 3 seconds. Then, all of the orders in the 3 second window will get the same price. (Read the Lopez Vargas paper to understand this in more detail)
 
 ===============
-Broker
+Component 2: Traders
 ===============
-- the broker consists of feeds
-- what is underlying value
-
+We currently have only built a limited number of different traders (RandomTrader, Maker, Sniper). These Traders are the ones that decide how much they want to buy or sell AMAZGOOG for. They will then place an order, and keep track of their inventory. 
 
 ===============
-Traders
+Component 3: Broker
 ===============
-- the broker consists of feeds
-- what is underlying value
+The Broker acts as a router between the Trader and Exchange. Let's go through an example, to see how the Broker routes these orders.
+1. A Trader wants to buy AMAZGOOG for 10$
+2. The Trader sends the order to the Broker
+3. The Broker saves the TraderID, and forwards the order to the Exchange
+4. The Exchange will Accept the order, and send a confirmation message back to the Broker
+5. The Broker then returns this confirmation message back to the Trader
+6. Eventually, when a cross occurs, the Exchange will send an executed message to the Broker
+7. The Broker will forward this executed message the the Trader
+8. The Trader can update it's inventory or algorithm
+
+The obvious question is now, what is the point of the Broker? At this point, the Trader could directly send orders to the Exchange. The Broker becomes essential when we introduce Feeds. Let's take the Underlying Value Feed as an example. The underlying value represents some fundamental value of a stock. When we generate an underlying value, we want all of the Random Traders to change the price of their orders. The Broker provides a centralized location to manage all of the Traders.
+
+In addition, the Broker will allow us to develop even more complex Feeds. For example, the Broker can keep track of all Traders, and do calculations on the overall market (suppose we want something very very simple like the average Buy price). The Broker has full view of the exchange, and can broadcast this information back to Traders.
+
+===============
+Conclusion
+===============
+The communication between the three components looks like this: Exchange <----> Broker <----> Traders
