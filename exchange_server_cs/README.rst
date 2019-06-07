@@ -126,18 +126,27 @@ We currently have only built a limited number of different traders (Random, Epsi
 		
 	Epsilon Trader: 
 		-Will have 5 pending orders to be executed or cancelled in the exchange for both buying and selling at all times.
+		
 		-Will buy at the price of the fundamental value (also known as V) minus a small value epsilon (1 cent)
+		
 		-Will sell at the price of the fundamental value plus a small value epsilon (1 cent)
+		
 		-Should the fundamental value change, it will cancel all orders, and the process will start again. 
+		
 		
 	Maker Trader:
 		-On one market will look at the fundamental value and post a buy at that value plus a spread divided by 2 (V+Spread/2)and sell at the fundamental value minus a spread divided by 2 (V-Spread/2).
+		
 		-On the other it market will sell immediateley after a buy in the first market and will buy immediateley after a sell in the first market. 
+		
 		
 	Sniper Trader:
 		-Will listen to the fundamental value on one market and as soon as it changes will buy if it increases or sell if it decreases.
+		
 		-On the other market it will sell immediateley after a buy in the first market and will buy immediateley after a sell in the first market.
+		
 		-The point of the sniper is to exploit latency that the other traders have. Since the sniper trader has a much lower latency, it is able to take action on changes in the fundamental value faster than other traders and perform arbitrage. 
+		
 
 ===============
 Component 3: Broker
