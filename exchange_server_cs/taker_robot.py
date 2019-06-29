@@ -1,11 +1,8 @@
 #~Bid_i(t) = BB_i - S * B(x(t), y(t))
 #~Ask_i(t) = BO_i + S * A(x(t), y(t))
 
-
 #Bid = min{[~Bid]s, BO - 2S}
 #Ask = max{[~Ask]s, BB + 2S}
-
-
 
 ##
 #create a robot  [X]
@@ -48,27 +45,30 @@ from make_connection import gotProtocol
 
 from twisted.protocols.basic import LineReceiver
 
+from message_handler import decodeServerOUCH, decodeClientOUCH
+
 aggressiveness = 0.5
-b_x = 0.5 #slider 
-b_y = 0.5 #slider 
+b_x = 0.5 #slider
+b_y = 0.5 #slider
 
-a_x = 0.5 #slider 
-a_y = 0.5 #slider 
+a_x = 0.5 #slider
+a_y = 0.5 #slider
 
-x = 1 #get from broker 
+x = 1 #get from broker
 y = 1 #get from broker
 
 
 S_CONST = 1
 
-#class Maker_Client(irc.IRCClient):
-#class Maker_Client(Protocol):
-class Maker_Client(LineReceiver):
+#class Taker_Client(irc.IRCClient):
+#class Taker_Client(Protocol):
+class Taker_Client(LineReceiver):
   def __init__(self):
     self.id = 0
     self.cash = 0
+    self.tokens = []
     self.inventory = {}
-    self.order_tokens = {}  # key = order token and value = 'B' or 'S'
+    self.order_tokens = {} # key = order token and value = 'B' or 'S'
     self.bid_stocks = {}  # stocks that you are bidding in market  key=order token and value = stock name
     self.ask_stocks = {}  # same as bid_stocks for key and value, this is needed cause executed messages dont return stock name
     self.bid_quantity = {}
@@ -178,93 +178,90 @@ class Maker_Client(LineReceiver):
 
   def connectionMade(self):
     msg =str(self.build_Message())
-    
+
     print("Message sent to broker printing..:\n")
     print(msg)
     print("Finished printing message to broker.\n")
     self.transport.write(bytes((msg).encode()))
 
   def connectionMade_2(self):
-    msg = str(self.build_Message_2('B'))
+    msg = str(self.build_CancelMsg('B'))
     self.transport.write(bytes((msg).encode()))
 
   def lineReceived(self, line):
     print("received from server:", line)
 
   def dataReceived(self, data):
-    print("data received from server:", data.decode())
-    #BB2x3BO5x6
-    self.best_bid = 3
-    self.best_offer = 4
-    self.connectionMade_2()
+	  ch = chr(data[0]).encode('ascii')
+	  if (ch == b'#'):
+		  print("BB/BO: ", data)
+	  else:
+		  msg_type, msg = decodeServerOUCH(data)
+		  print("SERVER SAYS: ", msg)
 
   def build_Message(self):
     #parameters: buy/sell and price
     message_type = OuchClientMessages.EnterOrder
     request = message_type (
-      order_token='{:014d}'.format(1000).encode('ascii'), 
-      buy_sell_indicator='B', shares=10, 
-      stock=b'AMAZGOOG', 
-      price=1000, 
-      time_in_force=10000, 
+      order_token='{:014d}'.format(1000).encode('ascii'),
+      buy_sell_indicator='B', shares=10,
+      stock=b'AMAZGOOG',
+      price=1000,
+      time_in_force=0,
       firm=b'OUCH',
-      display=b'N', 
-      capacity=b'O', 
-      intermarket_sweep_eligibility=b'N', 
-      minimum_quantity=1, 
-      cross_type=b'N', 
+      display=b'N',
+      capacity=b'O',
+      intermarket_sweep_eligibility=b'N',
+      minimum_quantity=1,
+      cross_type=b'N',
       customer_type=b' '
     )
     return request
 
-  def build_Message_2(self, Buy_or_Sell):
+  def build_CancelMsg(self, Buy_or_Sell):
     #parameters: buy/sell and price
     if(Buy_or_Sell == 'S'):
-      Price = self.new_ask() 
+      Price = min(self.new_ask(), self.best_bid)
     else:
-      Price = self.new_bid()
+      Price = max(self.new_bid(), self.best_offer)
+    #
+    # CancelOrder = ('{order_token}:{shares}',
+    #         {'msg_type': b'X'},
+    #         ['order_token', 'shares']
+    #     )
 
-    message_type = OuchClientMessages.ReplaceOrder
+    message_type = OuchClientMessages.EnterOrder
     request = message_type (
-      order_token='{:014d}'.format(1000).encode('ascii'), 
-      buy_sell_indicator= Buy_or_Sell, shares= 10000, 
-      stock=b'AMAZGOOG', 
-      price=Price, 
-      time_in_force=10000, 
+      order_token='{:014d}'.format(1000).encode('ascii'),
+      #msg_type = b'X'
+      buy_sell_indicator= Buy_or_Sell, shares=10,
+      stock=b'AMAZGOOG',
+      price=Price,
+      time_in_force=0,
       firm=b'OUCH',
-      display=b'N', 
-      capacity=b'O', 
-      intermarket_sweep_eligibility=b'N', 
-      minimum_quantity=1, 
-      cross_type=b'N', 
+      display=b'N',
+      capacity=b'O',
+      intermarket_sweep_eligibility=b'N',
+      minimum_quantity=1,
+      cross_type=b'N',
       customer_type=b' '
+
     )
     return request
 
 """
   factory = protocol.ClientFactory()
-  factory.protocol = Maker_Client(1, 0)
+  factory.protocol = Taker_Client(1, 0)
 
 """
-class TraderFactory(ClientFactory):
-    protocol = Maker_Client
 
-    def __init__(self):
-        self.done = Deferred()
 
-    def clientConnectionFailed(self, connector, reason):
-        print('connection failed:', reason.getErrorMessage())
-        self.done.errback(reason)
-
-    def clientConnectionLost(self, connector, reason):
-        print('connection lost:', reason.getErrorMessage())
-        self.done.callback(None)
-
-def main(reactor):
-    factory = TraderFactory()
+def main():
+    factory = ClientFactory()
     reactor.connectTCP('localhost', 8000, factory)
     return factory.done
 
 
 if __name__ == '__main__':
-    task.react(main)
+    main()
+    

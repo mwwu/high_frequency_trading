@@ -7,11 +7,12 @@ from random import randrange
 class ClientServer(protocol.Protocol):
     def connectionMade(self):
         self.factory.clients.append(self)
-        print('client connected')
+        print('INSIDE CONNECTION_MADE OF BROKER: client connected')
 
     #00000000000000:B44xAMAZGOOG@33
     #00000000001000:B10xAMAZGOOG@1000
     def dataReceived(self, data):
+        print("\nDATA RECEIVED FROM CLIENT: ", data)
         traderID = self.factory.clients.index(self)
 
         print('received from client', traderID, ': ' + data.decode())
